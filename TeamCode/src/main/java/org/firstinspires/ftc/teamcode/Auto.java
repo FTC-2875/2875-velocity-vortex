@@ -49,7 +49,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.opencv.android.JavaCameraView;
-@Disabled
+
 @Autonomous(name="Autonomous Beacon", group="Linear Opmode")  // @Autonomous(...) is the other common choice
 
 public class Auto extends LinearOpMode {
@@ -134,14 +134,14 @@ public class Auto extends LinearOpMode {
         while (opModeIsActive()) {
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             fun();
-            goToBeacon();
-            /*
-            beaconLineFollow();
-            chooseBeacon();
-            hitBeacon();
-             */
+            //goToBeacon();
+
+            //beaconLineFollow();
+            //chooseBeacon();
+            //hitBeacon();
+            forwardFor(16, 0.2);
             idle(); // Always call idle() at the bottom of your while(opModeIsActive()) loop
-            break;
+            sleep(10000);
         }
     }
 
@@ -151,7 +151,8 @@ public class Auto extends LinearOpMode {
     public void goToBeacon() throws InterruptedException {
         //drives to the white line
         //strafeLeftFor(60, 1);
-        forwardFor(28, 1);
+        forwardFor(60, 1);
+        // TODO: Find a Way to strafe using gyro on phone to auto correct strafe. Replace encoders with gyros
     }
 
     public void beaconLineFollow() throws InterruptedException {
@@ -174,16 +175,16 @@ public class Auto extends LinearOpMode {
                 foundLine = true;
                 stopMotors();
             } else if (leftColor < colorThreshold) {  // aligned too right
-                strafeLeftFor(1, 0.1);
+                leftFor(1, 0.1);
             } else if (rightColor < colorThreshold) { // aligned too left
-                strafeRightFor(1, 0.1);
+                rightFor(1, 0.1);
             } else {                                  // unknown alignment
-                strafeLeftFor(1, 0.1);
-                strafeRightFor(1, 0.1);
+                leftFor(1, 0.1);
+                rightFor(1, 0.1);
 
                 if (unknownState == true) {
-                    strafeRightFor(1, 0.1);
-                    strafeLeftFor(1, 0.1);
+                    rightFor(1, 0.1);
+                    leftFor(1, 0.1);
                     unknownState = false;
                 }
                 unknownState = true;
@@ -282,20 +283,20 @@ public class Auto extends LinearOpMode {
 
         while (leftFrontMotor.isBusy() || leftBackMotor.isBusy() || rightFrontMotor.isBusy() || rightBackMotor.isBusy()) {
             idle();
-            telemetry.addData("Current Position Left Front: ", leftFrontMotor.getCurrentPosition() / COUNTS_PER_INCH);
-            telemetry.addData("Target Position Left Front: ", leftFrontMotor.getTargetPosition() / COUNTS_PER_INCH);
+            telemetry.addData("Current Position Left Front: ", leftFrontMotor.getCurrentPosition());
+            telemetry.addData("Target Position Left Front: ", leftFrontMotor.getTargetPosition());
             telemetry.addLine();
 
-            telemetry.addData("Current Position Left Back: ", leftBackMotor.getCurrentPosition() / COUNTS_PER_INCH);
-            telemetry.addData("Target Position Left Back: ", leftBackMotor.getTargetPosition() / COUNTS_PER_INCH);
+            telemetry.addData("Current Position Left Back: ", leftBackMotor.getCurrentPosition());
+            telemetry.addData("Target Position Left Back: ", leftBackMotor.getTargetPosition());
             telemetry.addLine();
 
             telemetry.addData("Current Position Right Front: ", rightFrontMotor.getCurrentPosition());
-            telemetry.addData("Target Position Right Front: ", rightFrontMotor.getTargetPosition() / COUNTS_PER_INCH);
+            telemetry.addData("Target Position Right Front: ", rightFrontMotor.getTargetPosition());
             telemetry.addLine();
 
-            telemetry.addData("Current Position Right Back: ", rightBackMotor.getCurrentPosition() / COUNTS_PER_INCH);
-            telemetry.addData("Target Position Right Back: ", rightBackMotor.getTargetPosition() / COUNTS_PER_INCH);
+            telemetry.addData("Current Position Right Back: ", rightBackMotor.getCurrentPosition());
+            telemetry.addData("Target Position Right Back: ", rightBackMotor.getTargetPosition());
             telemetry.update();
         }
 
