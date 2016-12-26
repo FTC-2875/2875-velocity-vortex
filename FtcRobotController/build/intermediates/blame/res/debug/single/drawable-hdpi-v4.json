@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\FtcRobotController\\build\\intermediates\\res\\merged\\debug\\drawable-hdpi-v4\\ic_launcher.png",
+        "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\FtcRobotController\\src\\main\\res\\drawable-hdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\FtcRobotController\\build\\intermediates\\res\\merged\\debug\\drawable-hdpi-v4\\button_shape.xml",
+        "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\FtcRobotController\\build\\intermediates\\exploded-aar\\FtcCommon-release\\res\\drawable-hdpi-v4\\button_shape.xml"
+    }
+]

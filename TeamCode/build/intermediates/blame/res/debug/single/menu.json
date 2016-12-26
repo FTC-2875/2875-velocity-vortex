@@ -1,0 +1,14 @@
+[
+    {
+        "merged": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\res\\merged\\debug\\menu\\ftc_robot_controller.xml",
+        "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\exploded-aar\\2875-velocity-vortex\\FtcRobotController\\unspecified\\res\\menu\\ftc_robot_controller.xml"
+    },
+    {
+        "merged": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\res\\merged\\debug\\menu\\main_menu.xml",
+        "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\exploded-aar\\Inspection-release\\res\\menu\\main_menu.xml"
+    },
+    {
+        "merged": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\res\\merged\\debug\\menu\\menu_server.xml",
+        "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\exploded-aar\\Blocks-release\\res\\menu\\menu_server.xml"
+    }
+]
