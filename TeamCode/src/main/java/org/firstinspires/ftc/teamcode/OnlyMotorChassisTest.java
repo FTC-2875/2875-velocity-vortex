@@ -97,6 +97,12 @@ public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventLis
     private float axisY;
     private float axisZ;
 
+    private float initRotation;
+    private boolean rotationFlag;
+
+    private double speedFactor = 1;
+    private final int rotationThreshold = 0;
+
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -123,7 +129,7 @@ public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventLis
         leftBackMotor.setDirection(DcMotor.Direction.FORWARD);
 
         mSensorManager = (SensorManager) hardwareMap.appContext.getSystemService(Context.SENSOR_SERVICE);
-        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
         telemetry.addData("Program: ", Math.random() * 10);
@@ -152,22 +158,31 @@ public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventLis
             }
 
             if (gamepad1.dpad_left){
+                if (rotationFlag){
+                    initRotation = axisY;
+                    rotationFlag = false;
+                }
                 strafeLeftFor(0.5);
                 telemetry.addData("Strafing: ", "Left");
             } else if(gamepad1.dpad_right) {
+                if (rotationFlag){
+                    initRotation = axisY;
+                    rotationFlag = false;
+                }
                 strafeRightFor(0.5);
                 telemetry.addData("Strafing: ", "Right");
             } else {
                 leftFor(-gamepad1.left_stick_y * motorSpeedFactor);
                 rightFor(-gamepad1.right_stick_y * motorSpeedFactor);
-
+                rotationFlag = true;
                 telemetry.addData("Speed: L ", -gamepad1.left_stick_y * motorSpeedFactor);
                 telemetry.addData("Speed: R ", -gamepad1.right_stick_y * motorSpeedFactor);
             }
 
-            telemetry.addData("X: ", axisX);
+            telemetry.addData("X:", axisX);
             telemetry.addData("Y: ", axisY);
-            telemetry.addData("Z: ", axisZ);
+            telemetry.addData("Z:", axisZ);
+            telemetry.addData("initRotation:", initRotation);
             telemetry.update();
         }
 
@@ -203,19 +218,31 @@ public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventLis
     }
 
     public void strafeLeftFor( double power) throws InterruptedException {
-        motorPowerLeft(leftBackMotor, power*2);
-        motorPowerLeft(leftFrontMotor, -power*0.5);
+        if(initRotation > axisY-rotationThreshold){
+            speedFactor =  1.2f;
+        }else if(initRotation < axisY+rotationThreshold){
+            speedFactor = 0.8f;
+        }
+
+        motorPowerLeft(leftBackMotor, power);
+        motorPowerLeft(leftFrontMotor, -power*speedFactor);
         motorPowerRight(rightBackMotor, -power);
-        motorPowerRight(rightFrontMotor, power);
+        motorPowerRight(rightFrontMotor, power*speedFactor);
 
 
     }
 
     public void strafeRightFor( double power) throws InterruptedException {
+
+        if(initRotation > axisY-rotationThreshold){
+            speedFactor =  0.8f;
+        }else if(initRotation < axisY+rotationThreshold){
+            speedFactor = 1.2f;
+        }
         motorPowerLeft(leftBackMotor, -power);
-        motorPowerLeft(leftFrontMotor, power);
-        motorPowerRight(rightBackMotor, power*1.95);
-        motorPowerRight(rightFrontMotor, -power*0.45);
+        motorPowerLeft(leftFrontMotor, power*speedFactor);
+        motorPowerRight(rightBackMotor, power);
+        motorPowerRight(rightFrontMotor, -power*speedFactor);
 
 
     }
@@ -251,6 +278,11 @@ public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventLis
         axisX = event.values[0];
         axisY = event.values[1];
         axisZ = event.values[2];
+
+        axisZ = (float) Math.toDegrees(Math.asin(axisZ)*2);
+        axisY = (float) Math.toDegrees(Math.asin(axisY)*2);
+        axisX = (float) Math.toDegrees(Math.asin(axisX)*2);
+
 
     }
 
