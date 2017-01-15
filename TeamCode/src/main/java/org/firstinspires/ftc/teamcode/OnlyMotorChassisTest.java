@@ -32,6 +32,12 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.firstinspires.ftc.teamcode;
 
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -39,7 +45,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 
+import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
+
+import java.util.List;
 
 /**
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
@@ -55,7 +66,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  */
 
 @TeleOp(name="MECANUM WHEELS", group="Linear Opmode")  // @Autonomous(...) is the other common choice
-public class OnlyMotorChassisTest extends LinearOpMode
+public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventListener
 {
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();
@@ -79,6 +90,13 @@ public class OnlyMotorChassisTest extends LinearOpMode
 
     private double spinnerPower = 1.0;
 
+    private static SensorManager mSensorManager;
+    private static Sensor mSensor;
+
+    private float axisX;
+    private float axisY;
+    private float axisZ;
+
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -93,6 +111,7 @@ public class OnlyMotorChassisTest extends LinearOpMode
         leftBackMotor = hardwareMap.dcMotor.get("left back");
         rightBackMotor = hardwareMap.dcMotor.get("right back");
 
+
         shooterOn = false;
         /*-------------------------------------------------------------------------------
         | Set the drive motor directions
@@ -103,8 +122,23 @@ public class OnlyMotorChassisTest extends LinearOpMode
         leftFrontMotor.setDirection(DcMotor.Direction.FORWARD);
         leftBackMotor.setDirection(DcMotor.Direction.FORWARD);
 
+        mSensorManager = (SensorManager) hardwareMap.appContext.getSystemService(Context.SENSOR_SERVICE);
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+
+        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
+        telemetry.addData("Program: ", Math.random() * 10);
+        List<Sensor> testList = mSensorManager.getSensorList(Sensor.TYPE_ALL);
+        telemetry.addData("Size of testList", testList.size());
+
+        for (int i = 0; i < testList.size(); i++) {
+            telemetry.addData(testList.get(i).toString(), "");
+            telemetry.addLine();
+        }
+        telemetry.update();
+
         waitForStart();
         runtime.reset();
+
         while(opModeIsActive()){
 
             if (gamepad1.right_trigger > 0) {
@@ -118,10 +152,10 @@ public class OnlyMotorChassisTest extends LinearOpMode
             }
 
             if (gamepad1.dpad_left){
-                strafeLeftFor(1.0);
+                strafeLeftFor(0.5);
                 telemetry.addData("Strafing: ", "Left");
             } else if(gamepad1.dpad_right) {
-                strafeRightFor(1.0);
+                strafeRightFor(0.5);
                 telemetry.addData("Strafing: ", "Right");
             } else {
                 leftFor(-gamepad1.left_stick_y * motorSpeedFactor);
@@ -130,8 +164,11 @@ public class OnlyMotorChassisTest extends LinearOpMode
                 telemetry.addData("Speed: L ", -gamepad1.left_stick_y * motorSpeedFactor);
                 telemetry.addData("Speed: R ", -gamepad1.right_stick_y * motorSpeedFactor);
             }
-            telemetry.update();
 
+            telemetry.addData("X: ", axisX);
+            telemetry.addData("Y: ", axisY);
+            telemetry.addData("Z: ", axisZ);
+            telemetry.update();
         }
 
 
@@ -166,8 +203,8 @@ public class OnlyMotorChassisTest extends LinearOpMode
     }
 
     public void strafeLeftFor( double power) throws InterruptedException {
-        motorPowerLeft(leftBackMotor, power);
-        motorPowerLeft(leftFrontMotor, -power);
+        motorPowerLeft(leftBackMotor, power*2);
+        motorPowerLeft(leftFrontMotor, -power*0.5);
         motorPowerRight(rightBackMotor, -power);
         motorPowerRight(rightFrontMotor, power);
 
@@ -177,8 +214,8 @@ public class OnlyMotorChassisTest extends LinearOpMode
     public void strafeRightFor( double power) throws InterruptedException {
         motorPowerLeft(leftBackMotor, -power);
         motorPowerLeft(leftFrontMotor, power);
-        motorPowerRight(rightBackMotor, power);
-        motorPowerRight(rightFrontMotor, -power);
+        motorPowerRight(rightBackMotor, power*1.95);
+        motorPowerRight(rightFrontMotor, -power*0.45);
 
 
     }
@@ -206,6 +243,20 @@ public class OnlyMotorChassisTest extends LinearOpMode
         leftFrontMotor.setPower(0);
         rightBackMotor.setPower(0);
         rightFrontMotor.setPower(0);
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
+        axisX = event.values[0];
+        axisY = event.values[1];
+        axisZ = event.values[2];
+
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
     }
 
     //TODO

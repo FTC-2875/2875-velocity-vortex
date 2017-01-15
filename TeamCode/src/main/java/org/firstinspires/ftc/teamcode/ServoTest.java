@@ -32,11 +32,18 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.firstinspires.ftc.teamcode;
 
+import android.content.Context;
+import android.hardware.SensorManager;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.GyroSensor;
+import android.hardware.*;
+import android.content.Context;
+
 
 
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -81,6 +88,8 @@ public class ServoTest extends LinearOpMode
     private double motorSpeedFactor = 1;
 
     private double spinnerPower = 1.0;
+    private GyroSensor Gyro;
+    private int heading;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -97,6 +106,12 @@ public class ServoTest extends LinearOpMode
         rightBackMotor = hardwareMap.dcMotor.get("right back");
         shooter = hardwareMap.dcMotor.get("shooter");
         spinner = hardwareMap.dcMotor.get("spinner");
+        Gyro = hardwareMap.gyroSensor.get("Gyro");
+
+        //leftback leftfront
+
+        //mSensorManager = (SensorManager)getSystemService (Context.SENSOR_SERVICE);
+        //msensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 
 
         shooterOn = false;
@@ -110,10 +125,13 @@ public class ServoTest extends LinearOpMode
         leftBackMotor.setDirection(DcMotor.Direction.FORWARD);
         shooter.setDirection(DcMotor.Direction.FORWARD);
         spinner.setDirection(DcMotor.Direction.FORWARD);
+        Gyro.calibrate();
 
         waitForStart();
         runtime.reset();
+        while (Gyro.isCalibrating()){};
         while(opModeIsActive()){
+            //float axisX = SensorEvent.values[0];
 
             if (gamepad1.right_trigger > 0) {
                 motorSpeedFactor = 0.1;
@@ -168,6 +186,10 @@ public class ServoTest extends LinearOpMode
             } else {
                 spinner.setPower(0.0);
             }
+            //telemetry.addData("Gyro Values", )
+            heading = Gyro.getHeading();
+
+            telemetry.addData("Gyro Heading", heading);
 
 
 

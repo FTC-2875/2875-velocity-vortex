@@ -5,6 +5,7 @@ package org.firstinspires.ftc.teamcode;
  */
 
 import android.graphics.Color;
+import android.hardware.SensorManager;
 import android.view.View;
 
 import ftc.vision.BeaconColorResult;
@@ -18,6 +19,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
+import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.PWMOutput;
 import com.qualcomm.robotcore.hardware.PWMOutputController;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -47,6 +49,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.GyroSensor;
 
 import org.opencv.android.JavaCameraView;
 
@@ -64,6 +67,8 @@ public class Auto extends LinearOpMode {
     DcMotor rightFrontMotor = null;
     DcMotor leftBackMotor = null;
     DcMotor rightBackMotor = null;
+
+
 
     /*-----------------------------------------------------------------------
     | Sensor Declarations

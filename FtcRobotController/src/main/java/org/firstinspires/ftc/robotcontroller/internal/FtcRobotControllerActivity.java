@@ -40,6 +40,10 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.wifi.WifiManager;
@@ -111,9 +115,17 @@ import org.opencv.android.OpenCVLoader;
 import ftc.vision.BeaconProcessor;
 import ftc.vision.FrameGrabber;
 
-public class FtcRobotControllerActivity extends Activity {
-    ////////////// START VISION PROCESSING CODE //////////////
+public class FtcRobotControllerActivity extends Activity implements SensorEventListener{
 
+  private static float axisX;
+  private static float axisY;
+  private static float axisZ;
+
+
+
+
+
+  ////////////// START VISION PROCESSING CODE //////////////
     static final int FRAME_WIDTH_REQUEST = 176;
     static final int FRAME_HEIGHT_REQUEST = 144;
 
@@ -133,6 +145,29 @@ public class FtcRobotControllerActivity extends Activity {
         frameGrabber.setSaveImages(true);
     }
 
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        axisX = event.values[0];
+        axisY = event.values[1];
+        axisZ = event.values[2];
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    public static float getAxisX() {
+        return axisX;
+    }
+
+    public static float getAxisY() {
+        return axisY;
+    }
+
+    public static float getAxisZ() {
+        return axisZ;
+    }
     //when the "Grab" button is pressed
     public void frameButtonOnClick(View v){
         frameGrabber.grabSingleFrame();
