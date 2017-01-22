@@ -101,7 +101,7 @@ public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventLis
     private boolean rotationFlag;
 
     private double speedFactor = 1;
-    private final int rotationThreshold = 0;
+    private final int rotationThreshold = 1;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -219,9 +219,9 @@ public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventLis
 
     public void strafeLeftFor( double power) throws InterruptedException {
         if(initRotation > axisY-rotationThreshold){
-            speedFactor =  1.2f;
+            speedFactor =  1.2f * (initRotation - axisY);
         }else if(initRotation < axisY+rotationThreshold){
-            speedFactor = 0.8f;
+            speedFactor = 0.8f  * (axisY - initRotation);
         }
 
         motorPowerLeft(leftBackMotor, power);
@@ -235,9 +235,9 @@ public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventLis
     public void strafeRightFor( double power) throws InterruptedException {
 
         if(initRotation > axisY-rotationThreshold){
-            speedFactor =  0.8f;
+            speedFactor =  0.8f * (initRotation - axisY);
         }else if(initRotation < axisY+rotationThreshold){
-            speedFactor = 1.2f;
+            speedFactor = 1.2f * (axisY - initRotation);
         }
         motorPowerLeft(leftBackMotor, -power);
         motorPowerLeft(leftFrontMotor, power*speedFactor);

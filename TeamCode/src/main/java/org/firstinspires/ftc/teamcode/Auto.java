@@ -4,7 +4,11 @@ package org.firstinspires.ftc.teamcode;
  * Created by FTC2875 on 9/25/2016.
  */
 
+import android.content.Context;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.view.View;
 
@@ -35,6 +39,7 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -55,7 +60,7 @@ import org.opencv.android.JavaCameraView;
 
 @Autonomous(name="Autonomous Beacon", group="Linear Opmode")  // @Autonomous(...) is the other common choice
 
-public class Auto extends LinearOpMode {
+public class Auto extends LinearOpMode implements SensorEventListener {
 
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();
@@ -90,6 +95,20 @@ public class Auto extends LinearOpMode {
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
+
+
+    private static SensorManager mSensorManager;
+    private static Sensor mSensor;
+
+    private float axisX;
+    private float axisY;
+    private float axisZ;
+
+    private float initRotation;
+    private boolean rotationFlag;
+
+    private double speedFactor = 1;
+    private final int rotationThreshold = 0;
 
     @Override
     public void runOpMode() throws InterruptedException{
@@ -127,6 +146,12 @@ public class Auto extends LinearOpMode {
         rightFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightBackMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        mSensorManager = (SensorManager) hardwareMap.appContext.getSystemService(Context.SENSOR_SERVICE);
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+
+        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
+
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
@@ -139,14 +164,14 @@ public class Auto extends LinearOpMode {
         while (opModeIsActive()) {
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             fun();
-            //goToBeacon();
+            goToBeacon();
 
             //beaconLineFollow();
             //chooseBeacon();
             //hitBeacon();
-            forwardFor(16, 0.2);
-            idle(); // Always call idle() at the bottom of your while(opModeIsActive()) loop
+            //forwardFor(16, 0.2);
             sleep(10000);
+            idle(); // Always call idle() at the bottom of your while(opModeIsActive()) loop
         }
     }
 
@@ -155,9 +180,9 @@ public class Auto extends LinearOpMode {
     *-----------------------------------------------------------------------*/
     public void goToBeacon() throws InterruptedException {
         //drives to the white line
-        //strafeLeftFor(60, 1);
-        forwardFor(60, 1);
-        // TODO: Find a Way to strafe using gyro on phone to auto correct strafe. Replace encoders with gyros
+        strafeRightFor(45, 0.5);
+        //forwardFor(60, 1);
+
     }
 
     public void beaconLineFollow() throws InterruptedException {
@@ -248,27 +273,40 @@ public class Auto extends LinearOpMode {
     | NOTE: Yellow wire is in front for encoders
     *-----------------------------------------------------------------------*/
     public void forwardFor(int inches, double speed) throws InterruptedException {
-        encoderMove(inches, inches, -inches, -inches, speed);
+        encoderMove(inches, inches, -inches, -inches, speed, false, false);
     }
 
     public void rightFor(int inches, double speed) throws InterruptedException {
-        encoderMove(inches, inches, inches, inches, speed);
+        encoderMove(inches, inches, inches, inches, speed, false, false);
     }
 
     public void leftFor(int inches, double speed) throws InterruptedException {
-        encoderMove(inches, inches, inches, inches, speed);
+        encoderMove(inches, inches, inches, inches, speed, false, false);
     }
 
     public void strafeLeftFor(int inches, double speed) throws InterruptedException {
-        encoderMove(-inches, inches, -inches, inches, speed);
+        encoderMove(-inches, inches, -inches, inches, speed, true, false);
     }
 
     public void strafeRightFor(int inches, double speed) throws InterruptedException {
-        encoderMove(inches, -inches, inches, -inches, speed);
+        encoderMove(inches, -inches, inches, -inches, speed, true, true);
 
     }
 
-    public void encoderMove(int leftFront,int leftBack,int rightFront,int rightBack, double speed) throws InterruptedException{
+    public void encoderMove(int leftFront,int leftBack,int rightFront,int rightBack, double speed, boolean isStrafeing, boolean isRight) throws InterruptedException{
+
+        ElapsedTime time = new ElapsedTime();
+        time.reset();
+        float axisSum = 0;
+        int count =0;
+        while(time.milliseconds() < 1000) {
+            axisSum += axisY;
+            count++;
+        }
+        float averageY = axisSum / count;
+
+        float initRotation = averageY;
+
         leftFrontMotor.setTargetPosition((int)(leftFront * COUNTS_PER_INCH) + leftFrontMotor.getCurrentPosition());
         leftBackMotor.setTargetPosition((int)(leftBack * COUNTS_PER_INCH) + leftBackMotor.getCurrentPosition());
         rightFrontMotor.setTargetPosition((int)(rightFront * COUNTS_PER_INCH) + rightFrontMotor.getCurrentPosition());
@@ -281,29 +319,55 @@ public class Auto extends LinearOpMode {
         rightBackMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // RUN
-        leftFrontMotor.setPower(Math.abs(speed));
+        leftFrontMotor.setPower(Math.abs(speed * speedFactor));
         leftBackMotor.setPower(Math.abs(speed));
-        rightFrontMotor.setPower(Math.abs(speed));
+        rightFrontMotor.setPower(Math.abs(speed * speedFactor));
         rightBackMotor.setPower(Math.abs(speed));
 
         while (leftFrontMotor.isBusy() || leftBackMotor.isBusy() || rightFrontMotor.isBusy() || rightBackMotor.isBusy()) {
+//        ElapsedTime newtime = new ElapsedTime();
+//        newtime.reset();
+//        //while(newtime.milliseconds() < 3000) {
             idle();
-            telemetry.addData("Current Position Left Front: ", leftFrontMotor.getCurrentPosition());
-            telemetry.addData("Target Position Left Front: ", leftFrontMotor.getTargetPosition());
-            telemetry.addLine();
+            if(isStrafeing) {
+                if (isRight) {
+                    if (initRotation < axisY - rotationThreshold) {
+                        speedFactor = 0.3f / (axisY - initRotation);
+                    } else if (initRotation > axisY + rotationThreshold) {
+                        speedFactor = 1.7f * (initRotation - axisY);
+                    }
+                } else {
+                    if (initRotation < axisY - rotationThreshold) {
+                        speedFactor = 1.7f * (axisY - initRotation);
+                    } else if (initRotation > axisY + rotationThreshold) {
+                        speedFactor = 0.3f / (initRotation - axisY);
+                    }
+                }
+            }
 
-            telemetry.addData("Current Position Left Back: ", leftBackMotor.getCurrentPosition());
-            telemetry.addData("Target Position Left Back: ", leftBackMotor.getTargetPosition());
-            telemetry.addLine();
+//            telemetry.addData("Current Position Left Front: ", leftFrontMotor.getCurrentPosition());
+//            telemetry.addData("Target Position Left Front: ", leftFrontMotor.getTargetPosition());
+//            telemetry.addLine();
+//
+//            telemetry.addData("Current Position Left Back: ", leftBackMotor.getCurrentPosition());
+//            telemetry.addData("Target Position Left Back: ", leftBackMotor.getTargetPosition());
+//            telemetry.addLine();
+//
+//            telemetry.addData("Current Position Right Front: ", rightFrontMotor.getCurrentPosition());
+//            telemetry.addData("Target Position Right Front: ", rightFrontMotor.getTargetPosition());
+//            telemetry.addLine();
+//
+//            telemetry.addData("Current Position Right Back: ", rightBackMotor.getCurrentPosition());
+//            telemetry.addData("Target Position Right Back: ", rightBackMotor.getTargetPosition());
+//            telemetry.addLine();
 
-            telemetry.addData("Current Position Right Front: ", rightFrontMotor.getCurrentPosition());
-            telemetry.addData("Target Position Right Front: ", rightFrontMotor.getTargetPosition());
-            telemetry.addLine();
 
-            telemetry.addData("Current Position Right Back: ", rightBackMotor.getCurrentPosition());
-            telemetry.addData("Target Position Right Back: ", rightBackMotor.getTargetPosition());
+            telemetry.addData("Y: ", axisY);
+            telemetry.addData("Factor: ", speedFactor);
+            telemetry.addData("Initial: ", initRotation);
             telemetry.update();
         }
+        telemetry.update();
 
         stopMotors();
 
@@ -348,4 +412,21 @@ public class Auto extends LinearOpMode {
         Object result = FtcRobotControllerActivity.frameGrabber.getResult();
 
     }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        axisX = event.values[0];
+        axisY = event.values[1];
+        axisZ = event.values[2];
+
+        axisZ = (float) Math.toDegrees(Math.asin(axisZ)*2);
+        axisY = (float) Math.toDegrees(Math.asin(axisY)*2);
+        axisX = (float) Math.toDegrees(Math.asin(axisX)*2);
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
 }
