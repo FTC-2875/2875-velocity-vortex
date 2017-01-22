@@ -219,9 +219,9 @@ public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventLis
 
     public void strafeLeftFor( double power) throws InterruptedException {
         if(initRotation > axisY-rotationThreshold){
-            speedFactor =  1.2f * (initRotation - axisY);
+            speedFactor =  1.2f;
         }else if(initRotation < axisY+rotationThreshold){
-            speedFactor = 0.8f  * (axisY - initRotation);
+            speedFactor = 0.8f;
         }
 
         motorPowerLeft(leftBackMotor, power);
@@ -235,9 +235,9 @@ public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventLis
     public void strafeRightFor( double power) throws InterruptedException {
 
         if(initRotation > axisY-rotationThreshold){
-            speedFactor =  0.8f * (initRotation - axisY);
+            speedFactor =  0.8f;
         }else if(initRotation < axisY+rotationThreshold){
-            speedFactor = 1.2f * (axisY - initRotation);
+            speedFactor = 1.2f;
         }
         motorPowerLeft(leftBackMotor, -power);
         motorPowerLeft(leftFrontMotor, power*speedFactor);
