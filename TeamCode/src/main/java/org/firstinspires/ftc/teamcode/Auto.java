@@ -16,6 +16,7 @@ import ftc.vision.BeaconColorResult;
 import ftc.vision.FrameGrabber;
 
 import com.qualcomm.ftccommon.AboutActivity;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -109,6 +110,9 @@ public class Auto extends LinearOpMode implements SensorEventListener {
 
     private double speedFactor = 1;
     private final int rotationThreshold = 0;
+    private ModernRoboticsI2cGyro gyro = null;
+    private static final double LITTLE_VALUE = 0.7;
+    private static final double BIGGER_VALUE = 1.25;
 
     @Override
     public void runOpMode() throws InterruptedException{
@@ -130,6 +134,7 @@ public class Auto extends LinearOpMode implements SensorEventListener {
         bottomRightSensor = hardwareMap.analogInput.get("bottom right");
         bottomMiddleSensor = hardwareMap.analogInput.get("bottom middle");
         CDI = hardwareMap.deviceInterfaceModule.get("Device Interface Module 1");
+        gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
 
         /*-------------------------------------------------------------------------------
         | Encoder crap
@@ -151,7 +156,10 @@ public class Auto extends LinearOpMode implements SensorEventListener {
 
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
+        gyro.calibrate();
+        while (gyro.isCalibrating()) {
 
+        }
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
@@ -166,10 +174,9 @@ public class Auto extends LinearOpMode implements SensorEventListener {
             fun();
             goToBeacon();
 
-            //beaconLineFollow();
-            //chooseBeacon();
-            //hitBeacon();
-            //forwardFor(16, 0.2);
+            beaconLineFollow();
+            chooseBeacon();
+            hitBeacon();
             sleep(10000);
             idle(); // Always call idle() at the bottom of your while(opModeIsActive()) loop
         }
@@ -180,18 +187,19 @@ public class Auto extends LinearOpMode implements SensorEventListener {
     *-----------------------------------------------------------------------*/
     public void goToBeacon() throws InterruptedException {
         //drives to the white line
-        strafeRightFor(45, 0.5);
-        //forwardFor(60, 1);
+        strafeLeftFor(56, 0.5);
+        forwardFor(23, 0.5);
 
     }
 
     public void beaconLineFollow() throws InterruptedException {
         // line follows the white line
         // 4 = not white
-
+        boolean unknownState = false;
         boolean foundLine = false;
-        while(!foundLine) {
+        int i = 0;
 
+        while(!foundLine) {
             double middleColor = bottomMiddleSensor.getVoltage(); //
             double leftColor = bottomLeftSensor.getVoltage();     //
             double rightColor = bottomRightSensor.getVoltage();   //
@@ -200,29 +208,37 @@ public class Auto extends LinearOpMode implements SensorEventListener {
             telemetry.addData("Sensor Middle: ", middleColor);    //
             telemetry.update();                                   //
 
-            boolean unknownState = false;
+
             if (middleColor < colorThreshold) { // aligned perfectly
                 foundLine = true;
                 stopMotors();
             } else if (leftColor < colorThreshold) {  // aligned too right
-                leftFor(1, 0.1);
+                strafeLeftFor(2, 0.2);
             } else if (rightColor < colorThreshold) { // aligned too left
-                rightFor(1, 0.1);
+                strafeRightFor(2, 0.2);
             } else {                                  // unknown alignment
-                leftFor(1, 0.1);
-                rightFor(1, 0.1);
+//                strafeRightFor(2, 0.2);
+//
+//                if (unknownState) {
+//                    strafeLeftFor(3+i, 0.2);
+//                    unknownState = false;
+//                } else {
+//                    strafeRightFor(3+i, 0.2);
+//                    unknownState = true;
+//                }
 
-                if (unknownState == true) {
-                    rightFor(1, 0.1);
-                    leftFor(1, 0.1);
-                    unknownState = false;
+                while (leftColor < colorThreshold && rightColor < colorThreshold) {
+                    strafeRightFor(1, 0.3);
+                    leftColor = bottomLeftSensor.getVoltage();     //
+                    rightColor = bottomRightSensor.getVoltage();   //
                 }
-                unknownState = true;
+
             }
+            i++;
         }
 
         // we have found the line
-        forwardFor(4, 1);
+        forwardFor(2, 0.3);
     }
 
     public void chooseBeacon() throws InterruptedException {
@@ -246,7 +262,7 @@ public class Auto extends LinearOpMode implements SensorEventListener {
             telemetry.update();
 
             // go to the left and hit red button
-            strafeLeftFor(3, 0.5);
+            strafeLeftFor(3, 0.4);
             stopMotors();
             beaconLoop = true;
 
@@ -257,7 +273,7 @@ public class Auto extends LinearOpMode implements SensorEventListener {
             telemetry.update();
 
             // go to the right and hit red button
-            strafeRightFor(2, 0.5);
+            strafeRightFor(2, 0.4);
             stopMotors();
             beaconLoop = true;
         }
@@ -265,7 +281,7 @@ public class Auto extends LinearOpMode implements SensorEventListener {
     }
 
     public void hitBeacon() throws InterruptedException{
-        forwardFor(10, 0.1);
+        forwardFor(6, 0.3);
     }
 
     /*-----------------------------------------------------------------------
@@ -294,6 +310,10 @@ public class Auto extends LinearOpMode implements SensorEventListener {
     }
 
     public void encoderMove(int leftFront,int leftBack,int rightFront,int rightBack, double speed, boolean isStrafeing, boolean isRight) throws InterruptedException{
+        leftFrontMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftBackMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFrontMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightBackMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         ElapsedTime time = new ElapsedTime();
         time.reset();
@@ -324,57 +344,94 @@ public class Auto extends LinearOpMode implements SensorEventListener {
         rightFrontMotor.setPower(Math.abs(speed * speedFactor));
         rightBackMotor.setPower(Math.abs(speed));
 
-        while (leftFrontMotor.isBusy() || leftBackMotor.isBusy() || rightFrontMotor.isBusy() || rightBackMotor.isBusy()) {
+        gyro.resetZAxisIntegrator();
+        while (leftFrontMotor.isBusy() && leftBackMotor.isBusy() && rightFrontMotor.isBusy() && rightBackMotor.isBusy()) {
 //        ElapsedTime newtime = new ElapsedTime();
 //        newtime.reset();
 //        //while(newtime.milliseconds() < 3000) {
+            int leftFrontCurrent = leftFrontMotor.getCurrentPosition();
+            int rightFrontCurrent = rightFrontMotor.getCurrentPosition();
+            int leftBackCurrent = leftBackMotor.getCurrentPosition();
+            int rightBackCurrent = rightBackMotor.getCurrentPosition();
+
+            int leftFrontDifference = leftFrontMotor.getTargetPosition() - leftFrontCurrent;
+            int rightFrontDifference = rightFrontMotor.getTargetPosition() - rightFrontCurrent;
+            int leftBackDifference = leftBackMotor.getTargetPosition() - leftBackCurrent;
+            int rightBackDifference = rightBackMotor.getTargetPosition() - rightBackCurrent;
+            int zIntegration = 666;
             idle();
             if(isStrafeing) {
+                zIntegration = gyro.getIntegratedZValue();
                 if (isRight) {
-                    if (initRotation < axisY - rotationThreshold) {
-                        speedFactor = 0.3f / (axisY - initRotation);
-                    } else if (initRotation > axisY + rotationThreshold) {
-                        speedFactor = 1.7f * (initRotation - axisY);
+//                    if (initRotation < axisY - rotationThreshold) {
+//                        speedFactor = 0.3f / (axisY - initRotation);
+//                    } else if (initRotation > axisY + rotationThreshold) {
+//                        speedFactor = 1.7f * (initRotation - axisY);
+//                    }
+
+                    if (zIntegration < 0) {
+                        speedFactor = LITTLE_VALUE;
+                    } else {
+                        speedFactor = BIGGER_VALUE;
                     }
                 } else {
-                    if (initRotation < axisY - rotationThreshold) {
-                        speedFactor = 1.7f * (axisY - initRotation);
-                    } else if (initRotation > axisY + rotationThreshold) {
-                        speedFactor = 0.3f / (initRotation - axisY);
+//                    if (initRotation < axisY - rotationThreshold) {
+//                        speedFactor = 1.7f * (axisY - initRotation);
+//                    } else if (initRotation > axisY + rotationThreshold) {
+//                        speedFactor = 0.3f / (initRotation - axisY);
+//                    }
+
+                    if (zIntegration < 0) {
+                        speedFactor = BIGGER_VALUE;
+                    } else {
+                        speedFactor = LITTLE_VALUE;
                     }
                 }
             }
 
-//            telemetry.addData("Current Position Left Front: ", leftFrontMotor.getCurrentPosition());
-//            telemetry.addData("Target Position Left Front: ", leftFrontMotor.getTargetPosition());
-//            telemetry.addLine();
-//
-//            telemetry.addData("Current Position Left Back: ", leftBackMotor.getCurrentPosition());
-//            telemetry.addData("Target Position Left Back: ", leftBackMotor.getTargetPosition());
-//            telemetry.addLine();
-//
-//            telemetry.addData("Current Position Right Front: ", rightFrontMotor.getCurrentPosition());
-//            telemetry.addData("Target Position Right Front: ", rightFrontMotor.getTargetPosition());
-//            telemetry.addLine();
-//
-//            telemetry.addData("Current Position Right Back: ", rightBackMotor.getCurrentPosition());
-//            telemetry.addData("Target Position Right Back: ", rightBackMotor.getTargetPosition());
-//            telemetry.addLine();
+            leftFrontMotor.setPower(Math.abs(speed * speedFactor));
+            leftBackMotor.setPower(Math.abs(speed));
+            rightFrontMotor.setPower(Math.abs(speed * speedFactor));
+            rightBackMotor.setPower(Math.abs(speed));
 
+            telemetry.addData("Difference Left Front: ", leftFrontDifference);
+            telemetry.addData("Speed Left Front: ", leftFrontMotor.getPower());
+            telemetry.addLine();
 
-            telemetry.addData("Y: ", axisY);
+            telemetry.addData("Difference Left Back: ", leftBackDifference);
+            telemetry.addData("Speed Left Back: ", leftBackMotor.getPower());
+            telemetry.addLine();
+
+            telemetry.addData("Difference Right Front: ", rightFrontDifference);
+            telemetry.addData("Speed Right Front: ", rightFrontMotor.getPower());
+            telemetry.addLine();
+
+            telemetry.addData("Difference Right Back: ", rightBackDifference);
+            telemetry.addData("Speed Right Back: ", rightBackMotor.getPower());
+            telemetry.addLine();
+
+            if (rightBackDifference < 200
+                    || leftBackDifference < 200
+                    || rightFrontDifference < 200
+                    || leftFrontDifference < 200) {
+                leftFrontMotor.setPower(leftFrontMotor.getPower() - 0.10);
+                leftBackMotor.setPower(leftBackMotor.getPower() - 0.10);
+                rightFrontMotor.setPower(rightFrontMotor.getPower() - 0.10);
+                rightBackMotor.setPower(rightBackMotor.getPower() - 0.10);
+            }
+
+            telemetry.addData("Z Integration: ", zIntegration);
             telemetry.addData("Factor: ", speedFactor);
-            telemetry.addData("Initial: ", initRotation);
             telemetry.update();
         }
         telemetry.update();
 
-        stopMotors();
+        //stopMotors();
 
-        leftFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftBackMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightBackMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        leftFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        leftBackMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        rightFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        rightBackMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
     }
 

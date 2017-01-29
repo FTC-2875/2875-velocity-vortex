@@ -38,6 +38,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -103,6 +104,9 @@ public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventLis
     private double speedFactor = 1;
     private final int rotationThreshold = 1;
 
+    private ModernRoboticsI2cGyro gyro;
+
+
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -116,6 +120,7 @@ public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventLis
         rightFrontMotor = hardwareMap.dcMotor.get("right front");
         leftBackMotor = hardwareMap.dcMotor.get("left back");
         rightBackMotor = hardwareMap.dcMotor.get("right back");
+        gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
 
 
         shooterOn = false;
@@ -142,6 +147,9 @@ public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventLis
         }
         telemetry.update();
 
+        while(gyro.isCalibrating()) {
+
+        }
         waitForStart();
         runtime.reset();
 
@@ -160,6 +168,7 @@ public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventLis
             if (gamepad1.dpad_left){
                 if (rotationFlag){
                     initRotation = axisY;
+                    gyro.resetZAxisIntegrator();
                     rotationFlag = false;
                 }
                 strafeLeftFor(0.5);
@@ -167,6 +176,7 @@ public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventLis
             } else if(gamepad1.dpad_right) {
                 if (rotationFlag){
                     initRotation = axisY;
+                    gyro.resetZAxisIntegrator();
                     rotationFlag = false;
                 }
                 strafeRightFor(0.5);
@@ -179,10 +189,13 @@ public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventLis
                 telemetry.addData("Speed: R ", -gamepad1.right_stick_y * motorSpeedFactor);
             }
 
-            telemetry.addData("X:", axisX);
-            telemetry.addData("Y: ", axisY);
-            telemetry.addData("Z:", axisZ);
-            telemetry.addData("initRotation:", initRotation);
+            telemetry.addData("X:", gyro.rawX());
+            telemetry.addData("Y: ", gyro.rawY());
+            telemetry.addData("Z:", gyro.rawZ());
+            telemetry.addData("Integrated Z: ", gyro.getIntegratedZValue());
+            telemetry.addData("Heading: ", gyro.getHeading());
+            telemetry.addData("Factor: ", speedFactor);
+
             telemetry.update();
         }
 
@@ -217,13 +230,17 @@ public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventLis
 
     }
 
-    public void strafeLeftFor( double power) throws InterruptedException {
-        if(initRotation > axisY-rotationThreshold){
-            speedFactor =  1.2f;
-        }else if(initRotation < axisY+rotationThreshold){
-            speedFactor = 0.8f;
+    public void strafeLeftFor(double power) throws InterruptedException {
+//        if(initRotation > axisY-rotationThreshold){
+//            speedFactor =  1.2f;
+//        }else if(initRotation < axisY+rotationThreshold){
+//            speedFactor = 0.8f;
+//        }
+        if (gyro.getIntegratedZValue() < 0) {
+            speedFactor = 1.25;
+        } else {
+            speedFactor = 0.7;
         }
-
         motorPowerLeft(leftBackMotor, power);
         motorPowerLeft(leftFrontMotor, -power*speedFactor);
         motorPowerRight(rightBackMotor, -power);
@@ -234,11 +251,18 @@ public class OnlyMotorChassisTest extends LinearOpMode implements SensorEventLis
 
     public void strafeRightFor( double power) throws InterruptedException {
 
-        if(initRotation > axisY-rotationThreshold){
-            speedFactor =  0.8f;
-        }else if(initRotation < axisY+rotationThreshold){
-            speedFactor = 1.2f;
+//        if(initRotation > axisY-rotationThreshold){
+//            speedFactor =  0.8f;
+//        }else if(initRotation < axisY+rotationThreshold){
+//            speedFactor = 1.2f;
+//        }
+
+        if (gyro.getIntegratedZValue() < 0) {
+            speedFactor = 0.7;
+        } else {
+            speedFactor = 1.25;
         }
+
         motorPowerLeft(leftBackMotor, -power);
         motorPowerLeft(leftFrontMotor, power*speedFactor);
         motorPowerRight(rightBackMotor, power);
