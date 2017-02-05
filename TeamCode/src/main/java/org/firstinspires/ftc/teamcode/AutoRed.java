@@ -59,9 +59,9 @@ import com.qualcomm.robotcore.hardware.GyroSensor;
 
 import org.opencv.android.JavaCameraView;
 
-@Autonomous(name="Autonomous Beacon", group="Linear Opmode")  // @Autonomous(...) is the other common choice
+@Autonomous(name="Autonomous Beacon Red", group="Linear Opmode")  // @Autonomous(...) is the other common choice
 
-public class Auto extends LinearOpMode implements SensorEventListener {
+public class AutoRed extends LinearOpMode implements SensorEventListener {
 
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();
@@ -271,7 +271,7 @@ public class Auto extends LinearOpMode implements SensorEventListener {
             telemetry.update();
 
             // go to the left and hit red button
-            strafeLeftFor(3, 0.4);
+            strafeLeftFor(3, 0.5);
             stopMotors();
             beaconLoop = true;
 
@@ -282,7 +282,7 @@ public class Auto extends LinearOpMode implements SensorEventListener {
             telemetry.update();
 
             // go to the right and hit red button
-            strafeRightFor(2, 0.4);
+            strafeRightFor(2, 0.5);
             stopMotors();
             beaconLoop = true;
         }
