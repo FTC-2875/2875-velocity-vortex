@@ -87,7 +87,7 @@ containing a value of this type.
         public static int icon_robotcontroller=0x7f020004;
     }
     public static final class id {
-        public static int RelativeLayout=0x7f0c001a;
+        public static int RelativeLayout=0x7f0c0016;
         public static int aboutList=0x7f0c0003;
         public static int action_about=0x7f0c00b5;
         public static int action_blocks=0x7f0c00af;
@@ -109,11 +109,11 @@ containing a value of this type.
         public static int bannerParent=0x7f0c0062;
         public static int batteryLevel=0x7f0c002f;
         public static int bluetoothEnabled=0x7f0c0033;
-        public static int button3=0x7f0c0018;
+        public static int button3=0x7f0c0021;
         public static int buttonConfigure=0x7f0c0027;
         public static int buttonList=0x7f0c0063;
         public static int buttonWifiSettings=0x7f0c0024;
-        public static int cameraMonitorViewId=0x7f0c001f;
+        public static int cameraMonitorViewId=0x7f0c001b;
         public static int cancelButton=0x7f0c0065;
         public static int checkbox=0x7f0c00a2;
         public static int checkbox_port=0x7f0c00a1;
@@ -147,7 +147,7 @@ containing a value of this type.
         public static int filename_editText=0x7f0c0074;
         public static int files_holder=0x7f0c004a;
         public static int fixButton=0x7f0c0068;
-        public static int frameLayout=0x7f0c0016;
+        public static int frameLayout=0x7f0c001f;
         public static int front=0x7f0c0002;
         public static int holds_buttons=0x7f0c0048;
         public static int horizontalButtons=0x7f0c0076;
@@ -208,7 +208,7 @@ containing a value of this type.
         public static int port_number=0x7f0c005c;
         public static int port_title=0x7f0c0080;
         public static int readOnlyExplanation=0x7f0c004b;
-        public static int resultText=0x7f0c0019;
+        public static int resultText=0x7f0c0022;
         public static int robotIcon=0x7f0c0013;
         public static int row_port=0x7f0c005b;
         public static int row_port0=0x7f0c0082;
@@ -226,7 +226,7 @@ containing a value of this type.
         public static int server_url=0x7f0c0052;
         public static int servos_title=0x7f0c0097;
         public static int shape=0x7f0c00a8;
-        public static int show_camera_activity_java_surface_view=0x7f0c0017;
+        public static int show_camera_activity_java_surface_view=0x7f0c0020;
         public static int spinnerChannelSelect=0x7f0c0026;
         public static int swapButton=0x7f0c0069;
         public static int swapCaption=0x7f0c0057;
@@ -240,14 +240,14 @@ containing a value of this type.
         public static int textAdbLogs=0x7f0c005a;
         public static int textBadDeviceName=0x7f0c0007;
         public static int textDeviceName=0x7f0c0014;
-        public static int textErrorMessage=0x7f0c0020;
-        public static int textGamepad1=0x7f0c001e;
-        public static int textGamepad2=0x7f0c0021;
-        public static int textNetworkConnectionStatus=0x7f0c001b;
-        public static int textOpMode=0x7f0c001d;
+        public static int textErrorMessage=0x7f0c001c;
+        public static int textGamepad1=0x7f0c001a;
+        public static int textGamepad2=0x7f0c001d;
+        public static int textNetworkConnectionStatus=0x7f0c0017;
+        public static int textOpMode=0x7f0c0019;
         public static int textPleaseWait=0x7f0c0006;
-        public static int textRemoteProgrammingMode=0x7f0c0022;
-        public static int textRobotStatus=0x7f0c001c;
+        public static int textRemoteProgrammingMode=0x7f0c001e;
+        public static int textRobotStatus=0x7f0c0018;
         public static int textView=0x7f0c0038;
         public static int textView10=0x7f0c0030;
         public static int textView11=0x7f0c0036;

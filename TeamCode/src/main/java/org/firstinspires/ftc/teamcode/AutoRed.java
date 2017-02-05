@@ -271,7 +271,7 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
             telemetry.update();
 
             // go to the left and hit red button
-            strafeLeftFor(3, 0.5);
+            strafeLeftFor(4, 0.5);
             stopMotors();
             beaconLoop = true;
 
@@ -282,7 +282,7 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
             telemetry.update();
 
             // go to the right and hit red button
-            strafeRightFor(2, 0.5);
+            strafeRightFor(4, 0.5);
             stopMotors();
             beaconLoop = true;
         }
@@ -429,10 +429,10 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
                 rightBackMotor.setPower(rightBackMotor.getPower() - 0.10);
             }
 
-            if (rightBackDifference < 40
-                    || leftBackDifference < 40
-                    || rightFrontDifference < 40
-                    || leftFrontDifference < 40) {
+            if (rightBackDifference < 30
+                    || leftBackDifference < 30
+                    || rightFrontDifference < 30
+                    || leftFrontDifference < 30) {
                 stopMotors();
                 break;
             }

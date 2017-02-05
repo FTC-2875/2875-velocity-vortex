@@ -318,7 +318,9 @@ public class FtcRobotControllerActivity extends Activity {
     eventLoop = null;
 
     setContentView(R.layout.activity_ftc_controller);
-
+    ////////////// START VISION PROCESSING CODE //////////////
+    myOnCreate();
+    ////////////// END VISION PROCESSING CODE //////////////
     context = this;
     utility = new Utility(this);
     appUtil.setThisApp(new PeerAppRobotController(context));
@@ -412,12 +414,19 @@ public class FtcRobotControllerActivity extends Activity {
   @Override
   protected void onResume() {
     super.onResume();
+    ////////////// START VISION PROCESSING CODE //////////////
+    myOnResume();
+    ////////////// END VISION PROCESSING CODE //////////////
     RobotLog.vv(TAG, "onResume()");
   }
 
   @Override
   public void onPause() {
     super.onPause();
+
+    ////////////// START VISION PROCESSING CODE //////////////
+    myOnPause();
+    ////////////// END VISION PROCESSING CODE //////////////
     RobotLog.vv(TAG, "onPause()");
     if (programmingModeController.isActive()) {
       programmingModeController.stopProgrammingMode();
@@ -439,7 +448,9 @@ public class FtcRobotControllerActivity extends Activity {
   public void onDestroy() {
     super.onDestroy();
     RobotLog.vv(TAG, "onDestroy()");
-
+    ////////////// START VISION PROCESSING CODE //////////////
+    myOnDestroy();
+    ////////////// END VISION PROCESSING CODE //////////////
     unbindFromService();
     wifiLock.release();
     RobotLog.cancelWriteLogcatToDisk();
@@ -496,6 +507,9 @@ public class FtcRobotControllerActivity extends Activity {
     // When the window loses focus (e.g., the action overflow is shown),
     // cancel any pending hide action. When the window gains focus,
     // hide the system UI.
+    ////////////// START VISION PROCESSING CODE //////////////
+    myOnWindowFocusChanged(hasFocus);
+    ////////////// END VISION PROCESSING CODE //////////////
     if (hasFocus) {
       if (ImmersiveMode.apiOver19()){
         // Immersive flag only works on API 19 and above.
