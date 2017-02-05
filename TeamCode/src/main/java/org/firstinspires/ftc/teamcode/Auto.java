@@ -87,7 +87,7 @@ public class Auto extends LinearOpMode implements SensorEventListener {
     /*-----------------------------------------------------------------------
     | Global Variables
     *-----------------------------------------------------------------------*/
-    double colorThreshold = 3  ;
+    double colorThreshold = 3.1  ;
     boolean beaconChosen = false;
     boolean beaconLoop = false;
 
@@ -171,10 +171,10 @@ public class Auto extends LinearOpMode implements SensorEventListener {
         *-----------------------------------------------------------------------*/
         while (opModeIsActive()) {
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            fun();
-            goToBeacon();
-
-            beaconLineFollow();
+//            fun();
+//            goToBeacon();
+//
+//            beaconLineFollow();
             chooseBeacon();
             hitBeacon();
             sleep(10000);
@@ -247,14 +247,23 @@ public class Auto extends LinearOpMode implements SensorEventListener {
         telemetry.addData("Status: ", "Choosing Beacon");
         telemetry.update();
 
-        if(!beaconChosen) {
-            grabFrame();
-            beaconChosen = true;
-        }
-        ImageProcessorResult imageProcessorResult = FtcRobotControllerActivity.frameGrabber.getResult();
-        BeaconColorResult result = (BeaconColorResult) imageProcessorResult.getResult();
 
-        BeaconColorResult.BeaconColor leftColor = result.getLeftColor();
+
+        if(!beaconChosen) {
+            try {
+                grabFrame();
+                beaconChosen = true;
+            } catch (NullPointerException npe) {
+                npe.printStackTrace();
+            }
+        }
+
+            ImageProcessorResult imageProcessorResult = FtcRobotControllerActivity.frameGrabber.getResult();
+            BeaconColorResult result = (BeaconColorResult) imageProcessorResult.getResult();
+            BeaconColorResult.BeaconColor leftColor = result.getLeftColor();
+
+
+
         if (leftColor.toString().equals("RED") && !beaconLoop) {
             // telemetry data
             telemetry.addData("Left:", "RED");
@@ -354,10 +363,10 @@ public class Auto extends LinearOpMode implements SensorEventListener {
             int leftBackCurrent = leftBackMotor.getCurrentPosition();
             int rightBackCurrent = rightBackMotor.getCurrentPosition();
 
-            int leftFrontDifference = leftFrontMotor.getTargetPosition() - leftFrontCurrent;
-            int rightFrontDifference = rightFrontMotor.getTargetPosition() - rightFrontCurrent;
-            int leftBackDifference = leftBackMotor.getTargetPosition() - leftBackCurrent;
-            int rightBackDifference = rightBackMotor.getTargetPosition() - rightBackCurrent;
+            int leftFrontDifference = Math.abs(leftFrontMotor.getTargetPosition()) - Math.abs(leftFrontCurrent);
+            int rightFrontDifference = Math.abs(rightFrontMotor.getTargetPosition()) - Math.abs(rightFrontCurrent);
+            int leftBackDifference = Math.abs(leftBackMotor.getTargetPosition()) - Math.abs(leftBackCurrent);
+            int rightBackDifference = Math.abs(rightBackMotor.getTargetPosition()) - Math.abs(rightBackCurrent);
             int zIntegration = 666;
             idle();
             if(isStrafeing) {
@@ -420,6 +429,13 @@ public class Auto extends LinearOpMode implements SensorEventListener {
                 rightBackMotor.setPower(rightBackMotor.getPower() - 0.10);
             }
 
+            if (rightBackDifference < 40
+                    || leftBackDifference < 40
+                    || rightFrontDifference < 40
+                    || leftFrontDifference < 40) {
+                stopMotors();
+                break;
+            }
             telemetry.addData("Z Integration: ", zIntegration);
             telemetry.addData("Factor: ", speedFactor);
             telemetry.update();

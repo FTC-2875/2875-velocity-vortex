@@ -75,6 +75,7 @@ public class FrameGrabber implements CameraBridgeViewBase.CvCameraViewListener2 
     if(imageProcessor == null) {
       Log.e(TAG, "imageProcessor is null! Call setImageProcessor() to set it.");
       return true;
+
     } else {
       return false;
     }
