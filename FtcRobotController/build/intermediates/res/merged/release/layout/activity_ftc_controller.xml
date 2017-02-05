@@ -39,7 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     tools:context="org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity"
     android:focusable="true"
     android:id="@+id/entire_screen"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:weightSum="1">
 
   <!-- black bar on top -->
   <RelativeLayout
@@ -85,7 +86,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
   <include layout="@layout/header"
            android:id="@+id/included_header"
-      android:layout_height="31dp" />
+      android:layout_height="31dp"
+      android:layout_weight="0.35" />
 
   <RelativeLayout
     android:id="@+id/RelativeLayout"
@@ -177,44 +179,45 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       android:visibility="invisible"
       android:text="" />
 
-    <FrameLayout
-        android:layout_width="fill_parent"
-        android:layout_height="350dp"
-        android:id="@+id/frameLayout"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true">
-      <org.opencv.android.JavaCameraView
-          android:layout_width="fill_parent"
-          android:layout_height="fill_parent"
-          android:visibility="gone"
-          android:id="@+id/show_camera_activity_java_surface_view"
-          opencv:show_fps="true"
-          opencv:camera_id="1" />
-
-      <Button
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="Grab"
-          android:id="@+id/button3"
-          android:layout_gravity="end|bottom"
-          android:onClick="frameButtonOnClick"/>
-
-      <TextView
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:textAppearance="?android:attr/textAppearanceSmall"
-          android:text="[RESULT]"
-          android:id="@+id/resultText"
-          android:layout_gravity="end|top"
-          android:textColor="#ff0000" />
-
-    </FrameLayout>
-
   </RelativeLayout>
 
   <WebView
     android:id="@+id/webViewBlocksRuntime"
     android:layout_width="1dp"
     android:layout_height="1dp" />
+
+  <FrameLayout
+      android:layout_width="match_parent"
+      android:layout_height="148dp"
+      android:id="@+id/frameLayout"
+      android:layout_below="@+id/textOpMode"
+      android:layout_centerHorizontal="true"
+      android:layout_marginTop="20dp">
+    <org.opencv.android.JavaCameraView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:visibility="gone"
+        android:id="@+id/show_camera_activity_java_surface_view"
+        opencv:show_fps="true"
+        opencv:camera_id="1" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Grab"
+        android:id="@+id/button3"
+        android:layout_gravity="end|bottom"
+        android:onClick="frameButtonOnClick"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="[RESULT]"
+        android:id="@+id/resultText"
+        android:layout_gravity="end|top"
+        android:textColor="#ff0000" />
+
+  </FrameLayout>
 
 </LinearLayout>

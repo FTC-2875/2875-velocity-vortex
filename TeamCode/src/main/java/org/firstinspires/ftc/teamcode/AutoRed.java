@@ -155,6 +155,8 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
+        telemetry.addData("Random", Math.random());
+        telemetry.update();
 
         gyro.calibrate();
         while (gyro.isCalibrating()) {
@@ -171,10 +173,9 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
         *-----------------------------------------------------------------------*/
         while (opModeIsActive()) {
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-//            fun();
-//            goToBeacon();
-//
-//            beaconLineFollow();
+            fun();
+            goToBeacon();
+            beaconLineFollow();
             chooseBeacon();
             hitBeacon();
             sleep(10000);
@@ -266,23 +267,23 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
 
         if (leftColor.toString().equals("RED") && !beaconLoop) {
             // telemetry data
-            telemetry.addData("Left:", "RED");
-            telemetry.addData("Right:,", "BLUE");
+            telemetry.addData("Left:", "BLUE");
+            telemetry.addData("Right:,", "RED");
             telemetry.update();
 
-            // go to the left and hit red button
-            strafeLeftFor(4, 0.5);
+            // go to the right and hit red button
+            strafeRightFor(3, 0.5);
             stopMotors();
             beaconLoop = true;
 
         } else if (leftColor.toString().equals("BLUE") && !beaconLoop) {
             // telemetry data
-            telemetry.addData("Left:", "BLUE");
-            telemetry.addData("Right:", "RED");
+            telemetry.addData("Left:", "RED");
+            telemetry.addData("Right:", "BLUE");
             telemetry.update();
 
-            // go to the right and hit red button
-            strafeRightFor(4, 0.5);
+            // go to the left and hit red button
+            strafeLeftFor(3, 0.5);
             stopMotors();
             beaconLoop = true;
         }
@@ -290,7 +291,7 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
     }
 
     public void hitBeacon() throws InterruptedException{
-        forwardFor(6, 0.3);
+        forwardFor(8, 0.5);
     }
 
     /*-----------------------------------------------------------------------

@@ -71,7 +71,7 @@ public final class R {
 		public static final int bannerParent = 0x7f0c0062;
 		public static final int batteryLevel = 0x7f0c002f;
 		public static final int bluetoothEnabled = 0x7f0c0033;
-		public static final int button3 = 0x7f0c0021;
+		public static final int button3 = 0x7f0c0022;
 		public static final int buttonConfigure = 0x7f0c0027;
 		public static final int buttonList = 0x7f0c0063;
 		public static final int buttonWifiSettings = 0x7f0c0024;
@@ -109,7 +109,7 @@ public final class R {
 		public static final int filename_editText = 0x7f0c0074;
 		public static final int files_holder = 0x7f0c004a;
 		public static final int fixButton = 0x7f0c0068;
-		public static final int frameLayout = 0x7f0c001f;
+		public static final int frameLayout = 0x7f0c0020;
 		public static final int front = 0x7f0c0002;
 		public static final int holds_buttons = 0x7f0c0048;
 		public static final int horizontalButtons = 0x7f0c0076;
@@ -170,7 +170,7 @@ public final class R {
 		public static final int port_number = 0x7f0c005c;
 		public static final int port_title = 0x7f0c0080;
 		public static final int readOnlyExplanation = 0x7f0c004b;
-		public static final int resultText = 0x7f0c0022;
+		public static final int resultText = 0x7f0c0023;
 		public static final int robotIcon = 0x7f0c0013;
 		public static final int row_port = 0x7f0c005b;
 		public static final int row_port0 = 0x7f0c0082;
@@ -188,7 +188,7 @@ public final class R {
 		public static final int server_url = 0x7f0c0052;
 		public static final int servos_title = 0x7f0c0097;
 		public static final int shape = 0x7f0c00a8;
-		public static final int show_camera_activity_java_surface_view = 0x7f0c0020;
+		public static final int show_camera_activity_java_surface_view = 0x7f0c0021;
 		public static final int spinnerChannelSelect = 0x7f0c0026;
 		public static final int swapButton = 0x7f0c0069;
 		public static final int swapCaption = 0x7f0c0057;
@@ -231,7 +231,7 @@ public final class R {
 		public static final int txtManufacturer = 0x7f0c0029;
 		public static final int txtModel = 0x7f0c002b;
 		public static final int webViewBlockly = 0x7f0c0004;
-		public static final int webViewBlocksRuntime = 0x7f0c0023;
+		public static final int webViewBlocksRuntime = 0x7f0c001f;
 		public static final int widiConnected = 0x7f0c003b;
 		public static final int widiName = 0x7f0c0039;
 		public static final int wifiConnected = 0x7f0c0037;
