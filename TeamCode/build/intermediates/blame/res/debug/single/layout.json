@@ -16,12 +16,12 @@
         "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\exploded-aar\\Blocks-release\\res\\layout\\activity_programming_mode.xml"
     },
     {
-        "merged": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\res\\merged\\debug\\layout\\activity_ftc_configuration.xml",
-        "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\exploded-aar\\FtcCommon-release\\res\\layout\\activity_ftc_configuration.xml"
-    },
-    {
         "merged": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\res\\merged\\debug\\layout\\motor.xml",
         "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\exploded-aar\\FtcCommon-release\\res\\layout\\motor.xml"
+    },
+    {
+        "merged": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\res\\merged\\debug\\layout\\activity_ftc_configuration.xml",
+        "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\exploded-aar\\FtcCommon-release\\res\\layout\\activity_ftc_configuration.xml"
     },
     {
         "merged": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\res\\merged\\debug\\layout\\info_button.xml",
@@ -132,12 +132,12 @@
         "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\exploded-aar\\FtcCommon-release\\res\\layout\\shape.xml"
     },
     {
-        "merged": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\res\\merged\\debug\\layout\\i2c_device.xml",
-        "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\exploded-aar\\FtcCommon-release\\res\\layout\\i2c_device.xml"
-    },
-    {
         "merged": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\res\\merged\\debug\\layout\\activity_load.xml",
         "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\exploded-aar\\FtcCommon-release\\res\\layout\\activity_load.xml"
+    },
+    {
+        "merged": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\res\\merged\\debug\\layout\\i2c_device.xml",
+        "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\exploded-aar\\FtcCommon-release\\res\\layout\\i2c_device.xml"
     },
     {
         "merged": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\res\\merged\\debug\\layout\\simple_device.xml",

@@ -5,59 +5,28 @@ package org.firstinspires.ftc.teamcode;
  */
 
 import android.content.Context;
-import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.view.View;
 
 import ftc.vision.BeaconColorResult;
-import ftc.vision.FrameGrabber;
 
-import com.qualcomm.ftccommon.AboutActivity;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
-import com.qualcomm.robotcore.hardware.GyroSensor;
-import com.qualcomm.robotcore.hardware.PWMOutput;
-import com.qualcomm.robotcore.hardware.PWMOutputController;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import org.firstinspires.ftc.ftccommon.external.SoundPlayingRobotMonitor;
+
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.internal.AppUtil;
-import org.firstinspires.inspection.RcInspectionActivity;
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.JavaCameraView;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import ftc.vision.BeaconProcessor;
 import ftc.vision.ImageProcessorResult;
-import ftc.vision.ImageUtil;
 
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.hardware.GyroSensor;
-
-import org.opencv.android.JavaCameraView;
 
 @Autonomous(name="Autonomous Beacon Red", group="Linear Opmode")  // @Autonomous(...) is the other common choice
 
@@ -69,25 +38,27 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
     /*-----------------------------------------------------------------------
     | Motor Declarations
     *-----------------------------------------------------------------------*/
-    DcMotor leftFrontMotor = null;
-    DcMotor rightFrontMotor = null;
-    DcMotor leftBackMotor = null;
-    DcMotor rightBackMotor = null;
-
+    private DcMotor leftFrontMotor = null;
+    private DcMotor rightFrontMotor = null;
+    private DcMotor leftBackMotor = null;
+    private DcMotor rightBackMotor = null;
 
 
     /*-----------------------------------------------------------------------
     | Sensor Declarations
     *-----------------------------------------------------------------------*/
-    AnalogInput bottomLeftSensor = null;
-    AnalogInput bottomRightSensor = null;
-    AnalogInput bottomMiddleSensor = null;
-    DeviceInterfaceModule CDI = null;
+    private AnalogInput bottomLeftSensor = null;
+    private AnalogInput bottomRightSensor = null;
+    private AnalogInput bottomMiddleSensor = null;
+    private DeviceInterfaceModule CDI = null;
+    private ModernRoboticsI2cGyro gyro = null;
+    private ModernRoboticsI2cGyro straightGyro = null;
+    private ModernRoboticsI2cRangeSensor range = null;
 
     /*-----------------------------------------------------------------------
     | Global Variables
     *-----------------------------------------------------------------------*/
-    double colorThreshold = 3.1  ;
+    private static final double COLOR_THRESHOLD = 3.6  ;
     boolean beaconChosen = false;
     boolean beaconLoop = false;
 
@@ -110,9 +81,13 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
 
     private double speedFactor = 1;
     private final int rotationThreshold = 0;
-    private ModernRoboticsI2cGyro gyro = null;
+
     private static final double LITTLE_VALUE = 0.7;
     private static final double BIGGER_VALUE = 1.25;
+
+    private boolean checkLine = false;
+    private boolean checkBeacon = false;
+    private boolean realignStraight = false;
 
     @Override
     public void runOpMode() throws InterruptedException{
@@ -135,6 +110,8 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
         bottomMiddleSensor = hardwareMap.analogInput.get("bottom middle");
         CDI = hardwareMap.deviceInterfaceModule.get("Device Interface Module 1");
         gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
+        range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range");
+        straightGyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro 2");
 
         /*-------------------------------------------------------------------------------
         | Encoder crap
@@ -155,10 +132,9 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
-        telemetry.addData("Random", Math.random());
-        telemetry.update();
 
         gyro.calibrate();
+        straightGyro.calibrate();
         while (gyro.isCalibrating()) {
 
         }
@@ -172,8 +148,12 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
         | MAIN LOOP MAIN LOOP MAIN LOOP MAIN LOOP MAIN LOOP
         *-----------------------------------------------------------------------*/
         while (opModeIsActive()) {
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            fun();
+            telemetry.addData("raw ultrasonic", range.rawUltrasonic());
+            telemetry.addData("raw optical", range.rawOptical());
+            telemetry.addData("cm optical", "%.2f cm", range.cmOptical());
+            telemetry.addData("cm", "%.2f cm", range.getDistance(DistanceUnit.CM));
+            telemetry.update();
+            straightGyro.resetZAxisIntegrator();
             goToBeacon();
             beaconLineFollow();
             chooseBeacon();
@@ -189,16 +169,14 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
     public void goToBeacon() throws InterruptedException {
         //drives to the white line
         strafeLeftFor(56, 0.5);
-        forwardFor(23, 0.5);
+        forwardFor(25, 0.5);
 
     }
 
     public void beaconLineFollow() throws InterruptedException {
         // line follows the white line
         // 4 = not white
-        boolean unknownState = false;
         boolean foundLine = false;
-        int i = 0;
 
         while(!foundLine) {
             double middleColor = bottomMiddleSensor.getVoltage(); //
@@ -207,39 +185,19 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
             telemetry.addData("Sensor Right: ", rightColor);      // Sensor Reading Code
             telemetry.addData("Sensor Left: ", leftColor);        //
             telemetry.addData("Sensor Middle: ", middleColor);    //
-            telemetry.update();                                   //
+            telemetry.update();
 
-
-            if (middleColor < colorThreshold) { // aligned perfectly
-                foundLine = true;
-                stopMotors();
-            } else if (leftColor < colorThreshold) {  // aligned too right
-                strafeLeftFor(2, 0.2);
-            } else if (rightColor < colorThreshold) { // aligned too left
-                strafeRightFor(2, 0.2);
-            } else {                                  // unknown alignment
-//                strafeRightFor(2, 0.2);
-//
-//                if (unknownState) {
-//                    strafeLeftFor(3+i, 0.2);
-//                    unknownState = false;
-//                } else {
-//                    strafeRightFor(3+i, 0.2);
-//                    unknownState = true;
-//                }
-
-                while (leftColor < colorThreshold && rightColor < colorThreshold) {
-                    strafeRightFor(1, 0.3);
-                    leftColor = bottomLeftSensor.getVoltage();     //
-                    rightColor = bottomRightSensor.getVoltage();   //
-                }
-
-            }
-            i++;
+            checkLine = true;
+            strafeLeftFor(100, 0.5);
+            checkLine = false;
+            foundLine = true;
         }
 
         // we have found the line
-        forwardFor(2, 0.3);
+        realign();
+        checkBeacon = true;
+        forwardFor(10, 0.3);
+        checkBeacon = false;
     }
 
     public void chooseBeacon() throws InterruptedException {
@@ -247,8 +205,6 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
         // assuming we are on red team
         telemetry.addData("Status: ", "Choosing Beacon");
         telemetry.update();
-
-
 
         if(!beaconChosen) {
             try {
@@ -283,7 +239,7 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
             telemetry.update();
 
             // go to the left and hit red button
-            strafeLeftFor(3, 0.5);
+            strafeLeftFor(2, 0.5);
             stopMotors();
             beaconLoop = true;
         }
@@ -291,7 +247,7 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
     }
 
     public void hitBeacon() throws InterruptedException{
-        forwardFor(8, 0.5);
+        forwardFor(7, 0.4);
     }
 
     /*-----------------------------------------------------------------------
@@ -319,23 +275,25 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
 
     }
 
+    public void realign() {
+        int angle = straightGyro.getIntegratedZValue();
+        realignStraight = true;
+
+        //TODO fix left and right movement
+        if (// too far right)
+            leftFor(10, 0.3);
+        else if (// too far left)
+            rightFor(10, 0.3);
+
+        realignStraight = false;
+    }
+
     public void encoderMove(int leftFront,int leftBack,int rightFront,int rightBack, double speed, boolean isStrafeing, boolean isRight) throws InterruptedException{
         leftFrontMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftBackMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightFrontMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightBackMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        ElapsedTime time = new ElapsedTime();
-        time.reset();
-        float axisSum = 0;
-        int count =0;
-        while(time.milliseconds() < 1000) {
-            axisSum += axisY;
-            count++;
-        }
-        float averageY = axisSum / count;
-
-        float initRotation = averageY;
 
         leftFrontMotor.setTargetPosition((int)(leftFront * COUNTS_PER_INCH) + leftFrontMotor.getCurrentPosition());
         leftBackMotor.setTargetPosition((int)(leftBack * COUNTS_PER_INCH) + leftBackMotor.getCurrentPosition());
@@ -356,9 +314,7 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
 
         gyro.resetZAxisIntegrator();
         while (leftFrontMotor.isBusy() && leftBackMotor.isBusy() && rightFrontMotor.isBusy() && rightBackMotor.isBusy()) {
-//        ElapsedTime newtime = new ElapsedTime();
-//        newtime.reset();
-//        //while(newtime.milliseconds() < 3000) {
+
             int leftFrontCurrent = leftFrontMotor.getCurrentPosition();
             int rightFrontCurrent = rightFrontMotor.getCurrentPosition();
             int leftBackCurrent = leftBackMotor.getCurrentPosition();
@@ -370,27 +326,16 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
             int rightBackDifference = Math.abs(rightBackMotor.getTargetPosition()) - Math.abs(rightBackCurrent);
             int zIntegration = 666;
             idle();
+
             if(isStrafeing) {
                 zIntegration = gyro.getIntegratedZValue();
                 if (isRight) {
-//                    if (initRotation < axisY - rotationThreshold) {
-//                        speedFactor = 0.3f / (axisY - initRotation);
-//                    } else if (initRotation > axisY + rotationThreshold) {
-//                        speedFactor = 1.7f * (initRotation - axisY);
-//                    }
-
                     if (zIntegration < 0) {
                         speedFactor = LITTLE_VALUE;
                     } else {
                         speedFactor = BIGGER_VALUE;
                     }
                 } else {
-//                    if (initRotation < axisY - rotationThreshold) {
-//                        speedFactor = 1.7f * (axisY - initRotation);
-//                    } else if (initRotation > axisY + rotationThreshold) {
-//                        speedFactor = 0.3f / (initRotation - axisY);
-//                    }
-
                     if (zIntegration < 0) {
                         speedFactor = BIGGER_VALUE;
                     } else {
@@ -437,19 +382,36 @@ public class AutoRed extends LinearOpMode implements SensorEventListener {
                 stopMotors();
                 break;
             }
+
+            if (checkLine) {
+                double middle = bottomMiddleSensor.getVoltage();
+                telemetry.addData("Color: ", middle);
+                telemetry.update();
+                if (middle < COLOR_THRESHOLD)
+                    break;
+            }
+
+            if (checkBeacon) {
+                double distance = range.getDistance(DistanceUnit.CM);
+                telemetry.addData("Distance: ", distance);
+                telemetry.update();
+                if (distance < 23)
+                    break;
+            }
+
+            if (realignStraight) {
+                int angle = straightGyro.getIntegratedZValue();
+                telemetry.addData("Angle: ", angle);
+                telemetry.update();
+                if (angle == 0)
+                    break;
+            }
+
             telemetry.addData("Z Integration: ", zIntegration);
             telemetry.addData("Factor: ", speedFactor);
             telemetry.update();
         }
         telemetry.update();
-
-        //stopMotors();
-
-//        leftFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        leftBackMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        rightFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        rightBackMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
     }
 
     public void stopMotors(){
