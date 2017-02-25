@@ -32,21 +32,19 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.firstinspires.ftc.teamcode;
 
-import android.content.Context;
-import android.hardware.SensorManager;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.GyroSensor;
-import android.hardware.*;
-import android.content.Context;
+
+import android.media.MediaPlayer;
 
 
-
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import java.util.Random;
 
 /**
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
@@ -79,17 +77,20 @@ public class ServoTest extends LinearOpMode
     private DcMotor shooter = null;
     private DcMotor spinner = null;
 
-
-    private boolean spinnerOn = false;
-    private boolean shooterOn;
-
-    private boolean normalSpeed = true;
+    private Servo gate = null;
 
     private double motorSpeedFactor = 1;
 
     private double spinnerPower = 1.0;
     private GyroSensor Gyro;
     private int heading;
+
+    private MediaPlayer kobe = null;
+    private MediaPlayer lebron = null;
+
+    private TouchSensor touch = null;
+
+    private boolean amShooting = false;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -107,6 +108,8 @@ public class ServoTest extends LinearOpMode
         shooter = hardwareMap.dcMotor.get("shooter");
         spinner = hardwareMap.dcMotor.get("spinner");
         Gyro = hardwareMap.gyroSensor.get("Gyro");
+        touch = hardwareMap.touchSensor.get("touch");
+        gate = hardwareMap.servo.get("gate");
 
         //leftback leftfront
 
@@ -114,7 +117,6 @@ public class ServoTest extends LinearOpMode
         //msensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 
 
-        shooterOn = false;
         /*-------------------------------------------------------------------------------
         | Set the drive motor directions
         | "Reverse" the motor that runs backwards when connected directly to the battery
@@ -125,11 +127,16 @@ public class ServoTest extends LinearOpMode
         leftBackMotor.setDirection(DcMotor.Direction.FORWARD);
         shooter.setDirection(DcMotor.Direction.FORWARD);
         spinner.setDirection(DcMotor.Direction.FORWARD);
+
+        kobe = MediaPlayer.create(hardwareMap.appContext, R.raw.kobe);
+        lebron = MediaPlayer.create(hardwareMap.appContext, R.raw.lebron);
+
         Gyro.calibrate();
+        while (Gyro.isCalibrating()){};
 
         waitForStart();
         runtime.reset();
-        while (Gyro.isCalibrating()){};
+
         while(opModeIsActive()){
             //float axisX = SensorEvent.values[0];
 
@@ -159,20 +166,14 @@ public class ServoTest extends LinearOpMode
 
             /*-------------------------------------------------------------------------------
             | Shooter Code
-            | Spin in both the "collecting" and "pushing" direction
+            | Press A to shoot. loads automatically
             *------------------------------------------------------------------------------*/
-            if (gamepad1.right_bumper){
-                shooter.setPower(-0.60);
-
-            } else{
-                shooter.setPower(0.0);
-
-//                if (shooter.getPower() != 0) {
-//                    shooter.setPower(shooter.getPower() - 0.001);
-//
-//                }else{
-//
-//                }
+            if (gamepad1.a){
+                if (!amShooting) {
+                    chooseSound().start();
+                    shoot();
+                    amShooting = false;
+                }
             }
             telemetry.addData("shooter power", shooter.getPower());
             /*-------------------------------------------------------------------------------
@@ -181,8 +182,6 @@ public class ServoTest extends LinearOpMode
             *------------------------------------------------------------------------------*/
             if (gamepad1.left_bumper){
                 spinner.setPower(-1.0);
-            } else if (gamepad1.left_trigger > 0) {
-                spinner.setPower(1.0);
             } else {
                 spinner.setPower(0.0);
             }
@@ -198,6 +197,28 @@ public class ServoTest extends LinearOpMode
         }
 
 
+    }
+
+    //Lowers arm, loads ball, and then releases
+    private void shoot() {
+        while (!touch.isPressed()) {
+            shooter.setPower(-0.5);
+        }
+        gate.setPosition(180);
+
+        while (!touch.isPressed()) {
+            shooter.setPower(-0.5);
+        }
+    }
+
+    private MediaPlayer chooseSound() {
+        Random rng = new Random();
+        int roll = rng.nextInt(2);
+
+        if (roll == 0)
+            return kobe;
+        else
+            return lebron;
     }
 
 
