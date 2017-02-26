@@ -91,6 +91,8 @@ public class ServoTest extends LinearOpMode
     private TouchSensor touch = null;
 
     private boolean amShooting = false;
+    private boolean release = true;
+    private int ticks = 0;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -107,9 +109,9 @@ public class ServoTest extends LinearOpMode
         rightBackMotor = hardwareMap.dcMotor.get("right back");
         shooter = hardwareMap.dcMotor.get("shooter");
         spinner = hardwareMap.dcMotor.get("spinner");
-        Gyro = hardwareMap.gyroSensor.get("Gyro");
+        Gyro = hardwareMap.gyroSensor.get("gyro");
         touch = hardwareMap.touchSensor.get("touch");
-        gate = hardwareMap.servo.get("gate");
+        //gate = hardwareMap.servo.get("gate");
 
         //leftback leftfront
 
@@ -205,11 +207,20 @@ public class ServoTest extends LinearOpMode
         while (!touch.isPressed()) {
             shooter.setPower(-0.5);
         }
-        gate.setPosition(180);
-
-        while (!touch.isPressed()) {
-            shooter.setPower(-0.5);
+        //gate.setPosition(180);
+        while(gate.getPosition() != 0){
+            idle();
         }
+        release = true;
+        ticks = 0;
+        while (release) {
+            shooter.setPower(-0.5);
+            if (ticks > 3){
+                release = !touch.isPressed();
+            }//this will allow for the arm to move and not be in contact with the touch sensor
+            ticks++;
+        }
+        //gate.setPosition(0);
     }
 
     private MediaPlayer chooseSound() {
