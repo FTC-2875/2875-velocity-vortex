@@ -102,7 +102,7 @@ public class AutoRed extends LinearOpMode{
         rightBackMotor = hardwareMap.dcMotor.get("right back");
         spinner = hardwareMap.dcMotor.get("spinner");
         shooter = hardwareMap.dcMotor.get("shooter");
-        gate = hardwareMap.servo.get("gate");
+        //gate = hardwareMap.servo.get("gate");
 
         /*-----------------------------------------------------------------------
         | Sensor Hardware Declarations
@@ -147,20 +147,21 @@ public class AutoRed extends LinearOpMode{
         | MAIN LOOP MAIN LOOP MAIN LOOP MAIN LOOP MAIN LOOP
         | MAIN LOOP MAIN LOOP MAIN LOOP MAIN LOOP MAIN LOOP
         *-----------------------------------------------------------------------*/
+        while(opModeIsActive()) {
+            telemetry.addData("raw ultrasonic", range.rawUltrasonic());
+            telemetry.addData("raw optical", range.rawOptical());
+            telemetry.addData("cm optical", "%.2f cm", range.cmOptical());
+            telemetry.addData("cm", "%.2f cm", range.getDistance(DistanceUnit.CM));
+            telemetry.update();
+            straightGyro.resetZAxisIntegrator();
+            fun();
 
-        telemetry.addData("raw ultrasonic", range.rawUltrasonic());
-        telemetry.addData("raw optical", range.rawOptical());
-        telemetry.addData("cm optical", "%.2f cm", range.cmOptical());
-        telemetry.addData("cm", "%.2f cm", range.getDistance(DistanceUnit.CM));
-        telemetry.update();
-        straightGyro.resetZAxisIntegrator();
-        fun();
-
-        goToBeacon();
-        beaconLineFollow(0.3);
-        chooseBeacon();
-        hitBeacon();
-        secondBeacon();
+            goToBeacon();
+            beaconLineFollow(0.3);
+            chooseBeacon();
+            hitBeacon();
+            secondBeacon();
+        }
     }
 
     /*-----------------------------------------------------------------------
@@ -300,7 +301,7 @@ public class AutoRed extends LinearOpMode{
         while (!touch.isPressed()) {
             shooter.setPower(-0.5);
         }
-        gate.setPosition(180);
+        //gate.setPosition(180);
 
         while (!touch.isPressed()) {
             shooter.setPower(-0.5);

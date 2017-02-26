@@ -336,12 +336,13 @@ containing a value of this type.
         public static int cube_mesh_vertex_shader=0x7f050004;
         public static int errormessage=0x7f050005;
         public static int kobe=0x7f050006;
-        public static int nxtstartupsound=0x7f050007;
-        public static int shooting_stars=0x7f050008;
-        public static int simple_vertex_shader=0x7f050009;
-        public static int texture_fragment_shader=0x7f05000a;
-        public static int texture_vertex_shader=0x7f05000b;
-        public static int warningmessage=0x7f05000c;
+        public static int lebron=0x7f050007;
+        public static int nxtstartupsound=0x7f050008;
+        public static int shooting_stars=0x7f050009;
+        public static int simple_vertex_shader=0x7f05000a;
+        public static int texture_fragment_shader=0x7f05000b;
+        public static int texture_vertex_shader=0x7f05000c;
+        public static int warningmessage=0x7f05000d;
     }
     public static final class string {
         public static int VUFORIA_INIT_ERROR_DEVICE_NOT_SUPPORTED=0x7f0a0000;

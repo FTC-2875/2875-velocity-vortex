@@ -36,6 +36,10 @@
         "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\exploded-aar\\FtcCommon-release\\res\\raw\\chimedisconnect.wav"
     },
     {
+        "merged": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\res\\merged\\debug\\raw\\lebron.mp3",
+        "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\exploded-aar\\2875-velocity-vortex\\FtcRobotController\\unspecified\\res\\raw\\lebron.mp3"
+    },
+    {
         "merged": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\res\\merged\\debug\\raw\\errormessage.wav",
         "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\TeamCode\\build\\intermediates\\exploded-aar\\FtcCommon-release\\res\\raw\\errormessage.wav"
     },

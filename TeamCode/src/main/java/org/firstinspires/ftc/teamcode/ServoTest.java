@@ -170,6 +170,7 @@ public class ServoTest extends LinearOpMode
             *------------------------------------------------------------------------------*/
             if (gamepad1.a){
                 if (!amShooting) {
+                    amShooting = true;
                     chooseSound().start();
                     shoot();
                     amShooting = false;
