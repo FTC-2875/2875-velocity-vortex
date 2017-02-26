@@ -134,7 +134,7 @@ public class ServoTest extends LinearOpMode
         lebron = MediaPlayer.create(hardwareMap.appContext, R.raw.lebron);
 
         Gyro.calibrate();
-        while (Gyro.isCalibrating()){};
+        //while (Gyro.isCalibrating()){};
 
         waitForStart();
         runtime.reset();
@@ -205,21 +205,23 @@ public class ServoTest extends LinearOpMode
     //Lowers arm, loads ball, and then releases
     private void shoot() {
         while (!touch.isPressed()) {
-            shooter.setPower(-0.5);
+            shooter.setPower(-0.75);
         }
+        shooter.setPower(0);
         //gate.setPosition(180);
-        while(gate.getPosition() != 0){
-            idle();
-        }
+//        while(gate.getPosition() != 0){
+//            idle();
+//        }
         release = true;
         ticks = 0;
         while (release) {
-            shooter.setPower(-0.5);
+            shooter.setPower(-0.75);
             if (ticks > 3){
                 release = !touch.isPressed();
             }//this will allow for the arm to move and not be in contact with the touch sensor
             ticks++;
         }
+        shooter.setPower(0);
         //gate.setPosition(0);
     }
 
