@@ -302,9 +302,10 @@ public final class R {
 		public static final int nxtstartupsound = 0x7f050008;
 		public static final int shooting_stars = 0x7f050009;
 		public static final int simple_vertex_shader = 0x7f05000a;
-		public static final int texture_fragment_shader = 0x7f05000b;
-		public static final int texture_vertex_shader = 0x7f05000c;
-		public static final int warningmessage = 0x7f05000d;
+		public static final int smash = 0x7f05000b;
+		public static final int texture_fragment_shader = 0x7f05000c;
+		public static final int texture_vertex_shader = 0x7f05000d;
+		public static final int warningmessage = 0x7f05000e;
 	}
 	public static final class string {
 		public static final int VUFORIA_INIT_ERROR_DEVICE_NOT_SUPPORTED = 0x7f0a0000;

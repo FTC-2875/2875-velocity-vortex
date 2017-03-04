@@ -32,6 +32,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -82,17 +83,22 @@ public class ServoTest extends LinearOpMode
     private double motorSpeedFactor = 1;
 
     private double spinnerPower = 1.0;
-    private GyroSensor Gyro;
+    private ModernRoboticsI2cGyro gyro;
     private int heading;
 
     private MediaPlayer kobe = null;
     private MediaPlayer lebron = null;
+    private MediaPlayer smash = null;
 
     private TouchSensor touch = null;
 
     private boolean amShooting = false;
     private boolean release = true;
     private int ticks = 0;
+
+    private boolean rotationFlag = false;
+    private float initRotation;
+    private double speedFactor = 1;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -109,9 +115,9 @@ public class ServoTest extends LinearOpMode
         rightBackMotor = hardwareMap.dcMotor.get("right back");
         shooter = hardwareMap.dcMotor.get("shooter");
         spinner = hardwareMap.dcMotor.get("spinner");
-        Gyro = hardwareMap.gyroSensor.get("gyro");
+        gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
         touch = hardwareMap.touchSensor.get("touch");
-        //gate = hardwareMap.servo.get("gate");
+        gate = hardwareMap.servo.get("gate");
 
         //leftback leftfront
 
@@ -130,11 +136,18 @@ public class ServoTest extends LinearOpMode
         shooter.setDirection(DcMotor.Direction.FORWARD);
         spinner.setDirection(DcMotor.Direction.FORWARD);
 
+//        gate.setPosition(20);
+//        sleep(1000);
+//        gate.setPosition(110);
+
+
         kobe = MediaPlayer.create(hardwareMap.appContext, R.raw.kobe);
         lebron = MediaPlayer.create(hardwareMap.appContext, R.raw.lebron);
+        smash = MediaPlayer.create(hardwareMap.appContext, R.raw.smash);
 
-        Gyro.calibrate();
-        //while (Gyro.isCalibrating()){};
+
+        gyro.calibrate();
+        while (gyro.isCalibrating()){};
 
         waitForStart();
         runtime.reset();
@@ -153,14 +166,24 @@ public class ServoTest extends LinearOpMode
             }
 
             if (gamepad1.dpad_left){
-                strafeLeftFor(1.0);
+                if (rotationFlag){
+                    gyro.resetZAxisIntegrator();
+                    rotationFlag = false;
+                }
+                strafeLeftFor(0.5);
                 telemetry.addData("Strafing: ", "Left");
             } else if(gamepad1.dpad_right) {
-                strafeRightFor(1.0);
+                if (rotationFlag){
+                    gyro.resetZAxisIntegrator();
+                    rotationFlag = false;
+                }
+                strafeRightFor(0.5);
                 telemetry.addData("Strafing: ", "Right");
             } else {
-                leftFor(-gamepad1.left_stick_y * motorSpeedFactor);
-                rightFor(-gamepad1.right_stick_y * motorSpeedFactor);
+                double leftMotorPwr = -gamepad1.left_stick_y * motorSpeedFactor;
+                double rightMotorPwr = -gamepad1.right_stick_y * motorSpeedFactor;
+                leftFor(leftMotorPwr);
+                rightFor(rightMotorPwr);
 
                 telemetry.addData("Speed: L ", -gamepad1.left_stick_y * motorSpeedFactor);
                 telemetry.addData("Speed: R ", -gamepad1.right_stick_y * motorSpeedFactor);
@@ -178,6 +201,21 @@ public class ServoTest extends LinearOpMode
                     amShooting = false;
                 }
             }
+
+            if (gamepad1.x) {
+                gate.setPosition(1);
+                telemetry.addData("Servo Pos: ", gate.getPosition());
+                telemetry.update();
+
+            }
+
+            if (gamepad1.y) {
+                gate.setPosition(0.54);
+                telemetry.addData("Servo Pos: ", gate.getPosition());
+                telemetry.update();
+            }
+
+
             telemetry.addData("shooter power", shooter.getPower());
             /*-------------------------------------------------------------------------------
             | Spinner Code
@@ -189,9 +227,10 @@ public class ServoTest extends LinearOpMode
                 spinner.setPower(0.0);
             }
             //telemetry.addData("Gyro Values", )
-            heading = Gyro.getHeading();
 
             telemetry.addData("Gyro Heading", heading);
+            telemetry.addData("Servo Main Loop: ", gate.getPosition());
+
 
 
 
@@ -208,12 +247,16 @@ public class ServoTest extends LinearOpMode
             shooter.setPower(-0.75);
         }
         shooter.setPower(0);
-        //gate.setPosition(180);
-//        while(gate.getPosition() != 0){
-//            idle();
-//        }
+        //Open
+        gate.setPosition(0.54);
+
+        sleep(500);
+        //Close
+        gate.setPosition(1);
+        sleep(500);
         release = true;
         ticks = 0;
+        //Shoot
         while (release) {
             shooter.setPower(-0.75);
             if (ticks > 3){
@@ -222,7 +265,6 @@ public class ServoTest extends LinearOpMode
             ticks++;
         }
         shooter.setPower(0);
-        //gate.setPosition(0);
     }
 
     private MediaPlayer chooseSound() {
@@ -263,20 +305,43 @@ public class ServoTest extends LinearOpMode
 
     }
 
-    public void strafeLeftFor( double power) throws InterruptedException {
+    public void strafeLeftFor(double power) throws InterruptedException {
+//        if(initRotation > axisY-rotationThreshold){
+//            speedFactor =  1.2f;
+//        }else if(initRotation < axisY+rotationThreshold){
+//            speedFactor = 0.8f;
+//        }
+        if (gyro.getIntegratedZValue() < 0) {
+            speedFactor = 1.25;
+        } else {
+            speedFactor = 0.7;
+        }
         motorPowerLeft(leftBackMotor, power);
-        motorPowerLeft(leftFrontMotor, -power);
+        motorPowerLeft(leftFrontMotor, -power*speedFactor);
         motorPowerRight(rightBackMotor, -power);
-        motorPowerRight(rightFrontMotor, power);
+        motorPowerRight(rightFrontMotor, power*speedFactor);
 
 
     }
 
     public void strafeRightFor( double power) throws InterruptedException {
+
+//        if(initRotation > axisY-rotationThreshold){
+//            speedFactor =  0.8f;
+//        }else if(initRotation < axisY+rotationThreshold){
+//            speedFactor = 1.2f;
+//        }
+
+        if (gyro.getIntegratedZValue() < 0) {
+            speedFactor = 0.7;
+        } else {
+            speedFactor = 1.25;
+        }
+
         motorPowerLeft(leftBackMotor, -power);
-        motorPowerLeft(leftFrontMotor, power);
+        motorPowerLeft(leftFrontMotor, power*speedFactor);
         motorPowerRight(rightBackMotor, power);
-        motorPowerRight(rightFrontMotor, -power);
+        motorPowerRight(rightFrontMotor, -power*speedFactor);
 
 
     }

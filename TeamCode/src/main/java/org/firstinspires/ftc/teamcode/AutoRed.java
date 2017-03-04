@@ -66,7 +66,7 @@ public class AutoRed extends LinearOpMode{
     /*-----------------------------------------------------------------------
     | Global Variables
     *-----------------------------------------------------------------------*/
-    private static final double COLOR_THRESHOLD = 3.6  ;
+    private static final double COLOR_THRESHOLD = 2.6  ;
     boolean beaconChosen = false;
     boolean beaconLoop = false;
 
@@ -133,10 +133,13 @@ public class AutoRed extends LinearOpMode{
         player = MediaPlayer.create(hardwareMap.appContext, R.raw.shooting_stars);
 
         gyro.calibrate();
-        straightGyro.calibrate();
-        while (gyro.isCalibrating() || straightGyro.isCalibrating()) {
+        while (gyro.isCalibrating()) {
 
         }
+       //straightGyro.calibrate();
+        //while (straightGyro.isCalibrating()) {
+
+        //}
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -147,27 +150,30 @@ public class AutoRed extends LinearOpMode{
         | MAIN LOOP MAIN LOOP MAIN LOOP MAIN LOOP MAIN LOOP
         | MAIN LOOP MAIN LOOP MAIN LOOP MAIN LOOP MAIN LOOP
         *-----------------------------------------------------------------------*/
-        while(opModeIsActive()) {
-            telemetry.addData("raw ultrasonic", range.rawUltrasonic());
-            telemetry.addData("raw optical", range.rawOptical());
-            telemetry.addData("cm optical", "%.2f cm", range.cmOptical());
-            telemetry.addData("cm", "%.2f cm", range.getDistance(DistanceUnit.CM));
-            telemetry.update();
-            straightGyro.resetZAxisIntegrator();
-            fun();
+        telemetry.addData("raw ultrasonic", range.rawUltrasonic());
+        telemetry.addData("raw optical", range.rawOptical());
+        telemetry.addData("cm optical", "%.2f cm", range.cmOptical());
+        telemetry.addData("cm", "%.2f cm", range.getDistance(DistanceUnit.CM));
+        telemetry.addData("Middle Sensor: ", bottomMiddleSensor.getVoltage());
+        telemetry.update();
+        //straightGyro.resetZAxisIntegrator();
+        //fun();
 
-            goToBeacon();
-            beaconLineFollow(0.3);
-            chooseBeacon();
-            hitBeacon();
-            secondBeacon();
-        }
+        goToBeacon();
+        beaconLineFollow(0.3);
+        chooseBeacon();
+        hitBeacon();
+        secondBeacon();
     }
 
     /*-----------------------------------------------------------------------
     | GAMEPLAY PROGRESSION METHODS
     *-----------------------------------------------------------------------*/
     public void goToBeacon() throws InterruptedException {
+
+        if (!opModeIsActive()) {
+            return;
+        }
         //drives to the white line
         strafeLeftFor(56, 0.5);
         forwardFor(25, 0.5);
@@ -175,12 +181,18 @@ public class AutoRed extends LinearOpMode{
 
     }
 
+
     public void beaconLineFollow(double speed) throws InterruptedException {
         // line follows the white line
         // 4 = not white
+
+        if (!opModeIsActive()) {
+            return;
+        }
+
         boolean foundLine = false;
 
-        while(!foundLine) {
+        while(!foundLine && opModeIsActive()) {
             double middleColor = bottomMiddleSensor.getVoltage(); //
             double leftColor = bottomLeftSensor.getVoltage();     //
             double rightColor = bottomRightSensor.getVoltage();   //
@@ -203,14 +215,24 @@ public class AutoRed extends LinearOpMode{
     }
 
     public void secondBeacon() throws InterruptedException {
-        forwardFor(-3, 0.5);
-        strafeLeftFor(3, 0.5);
+
+        if (!opModeIsActive()) {
+            return;
+        }
+
+        forwardFor(-9, 0.5);
+        strafeLeftFor(10, 0.5);
         beaconLineFollow(0.7);
         chooseBeacon();
         hitBeacon();
     }
 
     public void chooseBeacon() throws InterruptedException {
+
+        if (!opModeIsActive()) {
+            return;
+        }
+
         // chooses which beacon to go to
         // assuming we are on red team
         telemetry.addData("Status: ", "Choosing Beacon");
@@ -289,24 +311,40 @@ public class AutoRed extends LinearOpMode{
         int angle = straightGyro.getIntegratedZValue();
         realignStraight = true;
 
-        if (angle > 0)
-            leftFor(10, 0.3);
-        else if (angle < 0)
-            rightFor(10, 0.3);
+        while (angle != 0 && opModeIsActive()) {
+            if (angle < 0)
+                leftFor(10, 0.3);
+            else if (angle > 0)
+                rightFor(10, 0.3);
+        }
+
 
         realignStraight = false;
     }
 
     private void shoot() {
-        while (!touch.isPressed()) {
-            shooter.setPower(-0.5);
-        }
-        //gate.setPosition(180);
+        boolean release;
+        int ticks;
 
         while (!touch.isPressed()) {
-            shooter.setPower(-0.5);
+            shooter.setPower(-0.75);
         }
-
+        shooter.setPower(0);
+        gate.setPosition(180);
+        while(gate.getPosition() != 0){
+            idle();
+        }
+        release = true;
+        ticks = 0;
+        while (release) {
+            shooter.setPower(-0.75);
+            if (ticks > 3){
+                release = !touch.isPressed();
+            }//this will allow for the arm to move and not be in contact with the touch sensor
+            ticks++;
+        }
+        shooter.setPower(0);
+        gate.setPosition(0);
     }
 
     public void encoderMove(int leftFront,int leftBack,int rightFront,int rightBack, double speed, boolean isStrafeing, boolean isRight) throws InterruptedException{
@@ -334,7 +372,7 @@ public class AutoRed extends LinearOpMode{
         rightBackMotor.setPower(Math.abs(speed));
 
         gyro.resetZAxisIntegrator();
-        while (leftFrontMotor.isBusy() && leftBackMotor.isBusy() && rightFrontMotor.isBusy() && rightBackMotor.isBusy()) {
+        while (leftFrontMotor.isBusy() && leftBackMotor.isBusy() && rightFrontMotor.isBusy() && rightBackMotor.isBusy() && opModeIsActive()) {
 
             int leftFrontCurrent = leftFrontMotor.getCurrentPosition();
             int rightFrontCurrent = rightFrontMotor.getCurrentPosition();
@@ -420,7 +458,7 @@ public class AutoRed extends LinearOpMode{
                     break;
             }
 
-            if (realignStraight) {
+           if (realignStraight) {
                 int angle = straightGyro.getIntegratedZValue();
                 telemetry.addData("Angle: ", angle);
                 telemetry.update();

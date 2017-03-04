@@ -28,6 +28,10 @@
         "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\FtcRobotController\\build\\intermediates\\exploded-aar\\FtcCommon-release\\res\\raw\\nxtstartupsound.wav"
     },
     {
+        "merged": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\FtcRobotController\\build\\intermediates\\res\\merged\\release\\raw\\smash.mp3",
+        "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\FtcRobotController\\src\\main\\res\\raw\\smash.mp3"
+    },
+    {
         "merged": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\FtcRobotController\\build\\intermediates\\res\\merged\\release\\raw\\texture_fragment_shader.glsl",
         "source": "C:\\Users\\FTC2875\\Documents\\Code\\2875-velocity-vortex\\FtcRobotController\\build\\intermediates\\exploded-aar\\RobotCore-release\\res\\raw\\texture_fragment_shader.glsl"
     },
